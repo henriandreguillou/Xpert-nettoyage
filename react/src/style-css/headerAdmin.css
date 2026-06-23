@@ -1,0 +1,90 @@
+
+
+.nav {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* pousse tout à droite */
+.nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* profil button */
+.profile-button {
+  background: #a38a5e;
+  color: white;
+  border: none;
+  font-size: 20px;
+  padding: 15px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* dropdown */
+.profile-wrapper {
+  position: relative;
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  width: 220px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.profile-info {
+  padding: 12px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.profile-info strong {
+  display: block;
+}
+
+.profile-info small {
+  color: #6b7280;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #333;
+}
+
+/* hover commun */
+.dropdown-item:hover {
+  background: #f3f4f6;
+}
+
+/* effet focus / clic clavier */
+.dropdown-item:active {
+  background: #e5e7eb;
+}
+
+/* version logout */
+.logout {
+  color: #dc2626;
+  font-weight: 600;
+  width: 100%;
+  background-color: white;
+  border-color: transparent;
+}
+
+/* hover logout spécifique */
+.logout:hover {
+  color: #b91c1c;
+}

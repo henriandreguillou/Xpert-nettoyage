@@ -1,0 +1,150 @@
+/* --- Conteneur Principal --- */
+.calendar-container {
+  padding: 30px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: 1200px;
+  margin: 20px auto;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Personnalisation de FullCalendar (Boutons & Header) --- */
+.fc .fc-button-primary {
+  background-color: #4f46e5 !important; /* Bleu moderne */
+  border-color: #4f46e5 !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #4338ca !important;
+  border-color: #4338ca !important;
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: #94a3b8 !important;
+  border-color: #94a3b8 !important;
+}
+
+.fc .fc-toolbar-title {
+  color: #1e293b;
+  font-size: 1.5rem !important;
+  font-weight: 600;
+}
+
+/* --- Design des Événements/Rendez-vous --- */
+.fc-v-event, .fc-h-event {
+  background-color: #e0e7ff !important; /* Fond bleu très clair */
+  border: 1px solid #c7d2fe !important;
+  border-left: 4px solid #4f46e5 !important; /* Barre latérale colorée */
+  border-radius: 6px !important;
+  padding: 2px 4px;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.fc-v-event:hover, .fc-h-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  background-color: #dee2ff !important;
+}
+
+.custom-event {
+  display: flex;
+  flex-direction: column;
+  color: #1e1b4b; /* Texte foncé pour le contraste */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-time {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #4f46e5;
+}
+
+.event-title {
+  font-size: 0.825rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- Fenêtre Modal Moderne --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6); /* Fond sombre semi-transparent */
+  backdrop-filter: blur(4px); /* Effet flouté à l'arrière */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: scaleUp 0.2s ease-out;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #0f172a;
+  font-size: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.modal-body p {
+  margin: 10px 0;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.modal-body b {
+  color: #64748b;
+  font-weight: 600;
+  display: inline-block;
+  width: 90px; /* Aligne les libellés proprement */
+}
+
+/* Bouton de fermeture */
+.modal-close-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
