@@ -15,7 +15,7 @@
 
 .contact-container {
   text-align: center;
-  background: #eef3f8; /* ou blanc cassé */
+  background: #eef3f8;
   max-width: 900px;
   width: 100%;
   padding: 40px;
@@ -30,8 +30,40 @@
 .contact-container p {
   font-size: 1.1rem;
   color: #555;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
+
+/* =========================
+   CONTACT INFO (NEW)
+   ========================= */
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  margin-bottom: 30px;
+}
+
+.contact-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 16px;
+  color: #222;
+}
+
+/* ICONS (NEW) */
+.icon {
+  color: #c8a96a;
+  font-size: 18px;
+}
+
+/* =========================
+   SOCIAL
+   ========================= */
 
 .socials {
   display: flex;
@@ -57,14 +89,17 @@
 }
 
 .contact-page .whatsapp {
-  background:  #1c1b1a;
+  background: #1c1b1a;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px; /* espace entre icône et texte */
+  gap: 10px;
 }
-/* Overlay */
+
+/* =========================
+   OVERLAY
+   ========================= */
 
 .overlay {
   position: fixed;

@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
+import {
+  FaWhatsapp,
+  FaEnvelope,
+  FaPhone
+} from "react-icons/fa";
+
 import qrCode from "../assets/WhatsApp_QRcode.jpeg";
-import "../style-css/contact.css"
+import "../style-css/contact.css";
 
 export default function Contact() {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -18,28 +23,42 @@ export default function Contact() {
   return (
     <div className="contact-page">
       <div className="contact-container">
+
         <h1>Contactez-nous</h1>
 
         <p>
           Besoin d'un devis ou d'informations sur nos services de nettoyage ?
         </p>
-         <p>📧contact@xpert-nettoyage.fr</p>
 
-        <p>📞 +33 6 70 52 51 66</p>
+        {/* CONTACT INFO PRO */}
+        <div className="contact-info">
 
+          <p className="contact-line">
+            <FaEnvelope className="icon" />
+            <span>contact@xpert-nettoyage.fr</span>
+          </p>
+
+          <p className="contact-line">
+            <FaPhone className="icon" />
+            <span>+33 6 70 52 51 66</span>
+          </p>
+
+        </div>
+
+        {/* WHATSAPP */}
         <div className="socials">
           <a
             href="#"
             onClick={openOverlay}
             className="social-icon whatsapp"
           >
-            <FaWhatsapp />
+            <FaWhatsapp className="icon" />
             <span>WhatsApp</span>
           </a>
         </div>
       </div>
 
-      {/* Overlay WhatsApp */}
+      {/* OVERLAY */}
       {showOverlay && (
         <div className="overlay" onClick={closeOverlay}>
           <div
@@ -63,11 +82,10 @@ export default function Contact() {
               >
                 Ouvrir WhatsApp
               </a>
-
             </div>
           </div>
         </div>
       )}
     </div>
   );
-}   
+}

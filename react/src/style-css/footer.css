@@ -214,3 +214,22 @@
     align-items: center;
   }
 }
+
+
+
+.footer-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  white-space: nowrap;
+  color: #fff;
+  font-size: 15px;
+  padding: 10px 0;
+}
+
+.icon {
+  color: #c8a96a;
+  font-size: 18px;
+  flex-shrink: 0;
+}

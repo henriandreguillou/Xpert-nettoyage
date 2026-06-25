@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaWhatsapp, FaMapMarkerAlt, FaEnvelope, FaPhone  } from "react-icons/fa";
 import qrCode from "../assets/WhatsApp_QRcode.jpeg";
 import logo from "../assets/logo.jpeg";
 import "../style-css/footer.css";
@@ -47,11 +47,23 @@ export default function Footer() {
 
           {/* Contact */}
           <div className="footer-section">
-            <h3>Contact</h3>
-            <p>📍 Haute-Savoie, France</p>
-            <p>📧 contact@xpert-nettoyage.fr</p>
-            <p>📞 +33 6 70 52 51 66</p>
-          </div>
+                  <h3>Contact</h3>
+
+                  <p className="footer-line">
+                    <FaMapMarkerAlt className="icon" />
+                    <span>Haute-Savoie, France</span>
+                  </p>
+
+                  <p className="footer-line">
+                    <FaEnvelope className="icon" />
+                    <span>contact@xpert-nettoyage.fr</span>
+                  </p>
+
+                  <p className="footer-line">
+                    <FaPhone className="icon" />
+                    <span>+33 6 70 52 51 66</span>
+                  </p>
+                </div>
 
           {/* Réseaux sociaux */}
           <div className="footer-section">

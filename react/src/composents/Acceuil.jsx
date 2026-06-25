@@ -2,6 +2,12 @@ import React from 'react';
 import backgroundImg from '../assets/acceuil.png';
 import { Link } from "react-router-dom";
 import "../style-css/acceuil.css"
+import {
+  FaCouch,
+  FaBed,
+  FaBrush,
+  FaChair
+} from "react-icons/fa";
 
 export default function Accueil() {
   return (
@@ -32,29 +38,30 @@ export default function Accueil() {
       </div>
 
       {/* --- SECTION DES SERVICES (4 COLONNES) --- */}
-      <div className="services-section">
+       <div className="services-section">
+
         <div className="services-grid">
-          
+
           <div className="service-item">
-            <div className="service-icon">🛋️</div>
+            <FaCouch className="service-icon" />
             <h3 className="service-title">Canapés & Fauteuils</h3>
             <p className="service-desc">Nettoyage en profondeur</p>
           </div>
 
           <div className="service-item">
-            <div className="service-icon">🛏️</div>
-            <h3 className="service-title">MATELAS & TêTE DE LIT</h3>
+            <FaBed className="service-icon" />
+            <h3 className="service-title">Matelas & Tête de lit</h3>
             <p className="service-desc">Hygiène & désinfection</p>
           </div>
 
           <div className="service-item">
-            <div className="service-icon">🧾</div>
+            <FaBrush className="service-icon" />
             <h3 className="service-title">Tapis & Moquettes</h3>
             <p className="service-desc">Soin des fibres</p>
           </div>
 
           <div className="service-item">
-            <div className="service-icon">🪑</div>
+            <FaChair className="service-icon" />
             <h3 className="service-title">Chaises & Sièges</h3>
             <p className="service-desc">Résultat impeccable</p>
           </div>
