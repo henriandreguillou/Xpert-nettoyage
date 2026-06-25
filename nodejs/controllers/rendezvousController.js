@@ -343,15 +343,15 @@ const getTakenHoursByDate = async (req, res) => {
 };
 
 
-
-
-
-
-
 module.exports = {
+  generateCodeRDV,
   getRendezvousByNum,
   createRendezvous,
   updateRendezvousByNum,
   deleteRendezvousByNum,
-  getTakenHoursByDate,
+  getTakenHoursByDate
 };
+
+
+
+

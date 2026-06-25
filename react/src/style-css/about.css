@@ -1,0 +1,100 @@
+/* PAGE */
+.about-page {
+  min-height: 100vh;
+  padding: 80px 20px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.75)),
+    url("../assets/acceuil.png");
+
+  background-size: cover;
+  background-position: center;
+}
+
+/* CARD */
+.about-card {
+  max-width: 900px;
+  width: 100%;
+
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 16px;
+
+  padding: 50px;
+
+  box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+
+  animation: fadeIn 0.7s ease;
+}
+
+/* TITRE PRINCIPAL */
+.about-card h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #111;
+}
+
+/* SOUS TITRES */
+.about-card h2 {
+  margin-top: 30px;
+  font-size: 20px;
+  color: #0b3d91;
+}
+
+/* PARAGRAPHES */
+.about-card p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+  margin-top: 10px;
+}
+
+/* LISTE */
+.about-card ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.about-card ul li {
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: #222;
+}
+
+/* HIGHLIGHT */
+.highlight {
+  margin-top: 30px;
+  padding: 15px;
+
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  color: white;
+
+  border-radius: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .about-card {
+    padding: 25px;
+  }
+
+  .about-card h1 {
+    font-size: 22px;
+  }
+}
