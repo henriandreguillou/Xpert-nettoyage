@@ -40,7 +40,7 @@
 .about-card h2 {
   margin-top: 30px;
   font-size: 20px;
-  color: #0b3d91;
+  color: #c8a96a;
 }
 
 /* PARAGRAPHES */
@@ -68,7 +68,7 @@
   margin-top: 30px;
   padding: 15px;
 
-  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  background: linear-gradient(90deg, #a08a29, #d3cecd);
   color: white;
 
   border-radius: 10px;
