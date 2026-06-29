@@ -10,7 +10,7 @@
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden; /* Empêche le scroll horizontal parasite */
   color: #2d2d2d;
   box-sizing: border-box;
   background-image: url("../assets/acceuil.png");
@@ -18,25 +18,24 @@
   background-position: center;
   background-repeat: no-repeat;
   width: 100%;
-  height: 100vh; 
 }
 
 .italic-light {
- font-size: 2.5rem;
+ font-size: 1.8rem; /* Réduit pour mobile par défaut */
 }
 
 .logo-image {
-  width: 90px;
+  width: 70px; /* Plus petit sur mobile */
   height: auto;
   object-fit: cover;
-  border-radius: 50%; /* retire cette ligne si tu veux garder le logo carré */
+  border-radius: 50%;
 }
-
 
 .logo-container {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 16px 24px 0 24px; /* Ajout d'un espace pour le logo sur mobile */
 }
 
 .decor-vague-bas {
@@ -44,7 +43,7 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 35px;
+  height: 25px; /* Plus discret sur mobile */
   background-color: rgba(244, 203, 72, 0.9);
   filter: blur(2px);
   pointer-events: none;
@@ -52,79 +51,63 @@
   z-index: 1;
 }
 
-@media (min-width: 768px) {
-  .decor-vague-gauche { width: 50px; }
-  .decor-vague-bas { height: 50px; }
-}
-
 /* --- SECTION PRINCIPALE (HERO) --- */
 .hero-section {
   flex-grow: 1;
   display: flex;
   align-items: center;
-  padding: 60px 24px;
+  padding: 40px 24px; /* Moins de padding vertical sur mobile */
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
   z-index: 10;
   box-sizing: border-box;
-  
 }
 
-/* Arrière-plan transparent et flouté appliqué partout (Mobile, Tablette, PC) */
+/* Arrière-plan transparent et flouté appliqué partout */
 .hero-content {
+  width: 100%; /* S'assure de prendre toute la largeur disponible */
   max-width: 700px;
-  background-color: rgba(255, 255, 255, 0.65); /* Opacité augmentée à 65% pour une meilleure lisibilité sur PC */
+  background-color: rgba(255, 255, 255, 0.75); /* Légèrement plus opaque sur mobile pour contrer les petits écrans */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 32px;
+  padding: 24px; /* Espace interne réduit pour laisser respirer le contenu */
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Léger reflet élégant sur les bords */
-}
-
-@media (min-width: 768px) {
-  .hero-section { 
-    padding: 80px; 
-  }
-  /* Les propriétés d'effacement du background ont été supprimées ici */
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .hero-title {
   font-family: 'Playfair Display', serif;
-  font-size: 2rem;
+  font-size: 1.8rem; /* Plus adapté aux téléphones */
   font-weight: 400;
   color: #1a1a1a;
-  line-height: 1.2;
+  line-height: 1.3;
   margin: 0 0 16px 0;
-}
-
-@media (min-width: 768px) {
-  .hero-title { font-size: 3rem; }
 }
 
 .hero-title .italic-light {
   font-weight: 300;
-
 }
 
 .hero-description {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #4a4a4a;
   font-weight: 300;
   line-height: 1.6;
-  margin: 0 0 32px 0;
-  max-width: 400px;
+  margin: 0 0 24px 0;
+  max-width: 100%; /* Utilise tout l'espace sur mobile */
 }
 
 /* Boutons d'action */
 .button-group {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  flex-direction: column; /* Boutons l'un sur l'autre sur les très petits écrans */
+  gap: 12px;
+  width: 100%;
 }
 
 .btn {
-  padding: 12px 24px;
+  padding: 14px 24px; /* Un poil plus grand pour faciliter le clic au doigt */
   font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -133,6 +116,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  text-align: center; /* Centre le texte sur mobile */
+  width: 100%; /* Les boutons prennent toute la largeur sur mobile */
 }
 
 .btn-primary {
@@ -161,44 +146,25 @@
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  padding: 40px 24px;
+  padding: 32px 24px;
   border-top: 1px solid #f0f0f0;
   z-index: 10;
-}
-
-@media (min-width: 768px) {
-  .services-section { padding: 40px 64px; }
 }
 
 .services-grid {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
-}
-
-@media (min-width: 576px) {
-  .services-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (min-width: 992px) {
-  .services-grid { grid-template-columns: repeat(4, 1fr); }
+  grid-template-columns: 1fr; /* Une seule colonne par défaut (mobile) */
+  gap: 24px;
 }
 
 .service-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* Centré par défaut sur mobile */
   text-align: center;
-  gap: 8px;
-}
-
-@media (min-width: 576px) {
-  .service-item {
-    align-items: flex-start;
-    text-align: left;
-  }
+  gap: 6px;
 }
 
 .service-icon {
@@ -224,7 +190,7 @@
 /* --- BARRE DE RÉASSURANCE --- */
 .reassurance-bar {
   background-color: #c8a96a;
-  padding: 12px 16px;
+  padding: 16px 24px;
   z-index: 20;
   color: #1a1a1a;
 }
@@ -233,22 +199,84 @@
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column; /* Éléments alignés verticalement sur mobile */
   justify-content: center;
   align-items: center;
-  gap: 24px;
-  font-size: 0.7rem;
+  gap: 16px;
+  font-size: 0.75rem; /* Un poil plus grand pour être lisible */
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-@media (min-width: 768px) {
-  .reassurance-content { gap: 48px; }
 }
 
 .reassurance-item {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* ==========================================
+   MEDIA QUERIES POUR LES ÉCRANS PLUS GRANDS
+   ========================================== */
+
+/* --- TABLETTES ET SMARTPHONES EN PAYSAGE (A partir de 576px) --- */
+@media (min-width: 576px) {
+  .services-grid { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+  .service-item {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .button-group {
+    flex-direction: row; /* Repasse les boutons côte à côte */
+  }
+  .btn {
+    width: auto; /* Les boutons reprennent leur taille normale */
+  }
+}
+
+/* --- ÉCRANS INTERMÉDIAIRES / PC (A partir de 768px) --- */
+@media (min-width: 768px) {
+  .accueil-container {
+    height: 100vh; /* On peut remettre les 100vh fixes uniquement sur PC */
+  }
+  .italic-light {
+    font-size: 2.5rem;
+  }
+  .logo-image {
+    width: 90px;
+  }
+  .decor-vague-gauche { 
+    width: 50px; 
+  }
+  .decor-vague-bas { 
+    height: 50px; 
+  }
+  .hero-section { 
+    padding: 80px; 
+  }
+  .hero-content {
+    padding: 32px;
+  }
+  .hero-title { 
+    font-size: 3rem; 
+  }
+  .services-section { 
+    padding: 40px 64px; 
+  }
+  .reassurance-content { 
+    flex-direction: row; /* Remet la réassurance sur une seule ligne */
+    gap: 48px; 
+  }
+}
+
+/* --- GRANDS ÉCRANS PC (A partir de 992px) --- */
+@media (min-width: 992px) {
+  .services-grid { 
+    grid-template-columns: repeat(4, 1fr); 
+  }
+  .hero-description {
+    max-width: 400px;
+  }
 }

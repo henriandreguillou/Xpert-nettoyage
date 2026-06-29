@@ -13,7 +13,7 @@
   background-attachment: fixed; /* Optionnel : fixe le fond lors du défilement */
   color: #e0e0e0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  padding: 24px;
+  padding: 40px 16px; /* Ajusté pour donner plus d'espace en haut/bas sur mobile */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,23 +25,26 @@
   max-width: 670px;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Espace entre chaque ligne */
+  gap: 16px; /* Légèrement réduit sur mobile pour gagner de la place */
   z-index: 1; /* Assure que la liste reste bien au-dessus du fond */
 }
 
-/* Ligne d'un service (Bloc) */
-.service-item {
+/* Ligne d'un service (Bloc) - MODIFIÉ POUR MOBILE */
+.services-item {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px;
+  flex-direction: column; /* Par défaut sur mobile : l'un sous l'autre */
+  align-items: center;   /* Centre l'image et le texte sur mobile */
+  text-align: center;    /* Centre le texte pour un rendu plus propre sur mobile */
+  gap: 16px;             /* Espace réduit sur mobile */
+  padding: 20px;
   border-radius: 12px;
   cursor: pointer;
-  background-color: rgba(26, 26, 26, 0.7); /* Léger fond translucide pour détacher du fond */
+  background-color: rgba(26, 26, 26, 0.4); /* Léger fond translucide pour détacher du fond */
   backdrop-filter: blur(4px); /* Effet flou moderne derrière les blocs */
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
+/* Effet hover actif uniquement sur PC */
 
 
 /* Conteneur de l'image (Gestion de la taille et de la forme) */
@@ -64,12 +67,14 @@
 .service-content {
   flex: 1;
   min-width: 0; /* Empêche le texte de casser la mise en page flex */
+  width: 100%;  /* Prend toute la largeur disponible sur mobile */
 }
 
 /* Ligne de titre (Emoji + Texte) */
 .service-header {
   display: flex;
   align-items: center;
+  justify-content: center; /* Centre le header (emoji + titre) sur mobile */
   gap: 8px;
   color: #ffffff;
   font-size: 1rem;
@@ -77,22 +82,50 @@
   margin: 0;
 }
 
-.service-title {
+.services-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; /* Coupe proprement si le titre est trop long */
+  /* On autorise le retour à la ligne sur mobile pour éviter que le titre soit coupé brutalement */
+  white-space: normal; 
 }
 
 /* Description textuelle */
 .service-description {
-  margin: 4px 0 0 0;
+  margin: 8px 0 0 0;
   font-size: 0.875rem; /* 14px */
-  color: #8a8a8a;
+  color: #a0a0a0; /* Légèrement éclairci pour une meilleure lisibilité sur fond sombre */
   line-height: 1.5;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ==========================================
+   MEDIA QUERY : POUR LES ÉCRANS TABLETTES / PC (A partir de 576px)
+   ========================================== */
+@media (min-width: 576px) {
+  .services-container {
+    padding: 24px;
+  }
+
+  .services-list {
+    gap: 20px;
+  }
+
+  .services-item {
+    flex-direction: row; /* Aligne l'image à gauche et le texte à droite */
+    align-items: center;
+    text-align: left;    /* Aligne le texte à gauche */
+    gap: 30px;           /* Reprend le grand espace initial */
+  }
+
+  .service-header {
+    justify-content: flex-start; /* Réaligne le titre à gauche */
+  }
+
+  .services-title {
+    white-space: nowrap; /* Coupe le texte proprement sur PC si trop long */
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
