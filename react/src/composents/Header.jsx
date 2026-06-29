@@ -82,7 +82,7 @@ export default function Header() {
               className="dropdown-button"
               onClick={() => setOpen((prev) => !prev)}
             >
-              Obtenir une estimation<span className={`arrow ${open ? "up" : ""}`}>▾</span>
+              prendre rendez-vous<span className={`arrow ${open ? "up" : ""}`}>▾</span>
             </button>
 
             {open && (

@@ -1,7 +1,7 @@
-import React from 'react';
-import backgroundImg from '../assets/acceuil.png';
-import { Link } from "react-router-dom";
-import "../style-css/acceuil.css"
+import React, { useState, useEffect, useRef } from "react";
+import backgroundImg from "../assets/acceuil.png";
+import { Link, useLocation } from "react-router-dom";
+import "../style-css/acceuil.css";
 import {
   FaCouch,
   FaBed,
@@ -10,36 +10,122 @@ import {
 } from "react-icons/fa";
 
 export default function Accueil() {
+  const [open, setOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const location = useLocation();
+
+  // Reset à chaque changement de page
+  useEffect(() => {
+    setOpen(false);
+    setIsMenuOpen(false);
+  }, [location]);
+
+  // click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ESC
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEsc);
+    return () =>
+      document.removeEventListener("keydown", handleEsc);
+  }, []);
+
   return (
-    <div
-      className="accueil-container"
-    >
-      {/* Formes décoratives jaunes sur les contours */}
+    <div className="accueil-container">
+
+      {/* décor */}
       <div className="decor-vague-gauche"></div>
       <div className="decor-vague-bas"></div>
 
-      {/* --- SECTION PRINCIPALE (HERO) --- */}
+      {/* HERO */}
       <div className="hero-section">
         <div className="hero-content">
+
           <h1 className="hero-title">
             Entretien & hygiène <br />
-            <span className="italic-light"> des textiles d'ameublement</span>
+            <span className="italic-light">
+              des textiles d'ameublement
+            </span>
           </h1>
-          
+
           <p className="hero-description">
             Au service des chalets, hôtels, résidences, conciergeries et particuliers.
           </p>
 
           <div className="button-group">
-            <Link className=" btn btn-secondary" to="/services">Nos Services</Link>
-            <button className="btn btn-primary">Obtenier une estimation</button>
+
+            <Link className="btn btn-secondary" to="/services">
+              Nos Services
+            </Link>
+
+            {/* DROPDOWN RENDEZ-VOUS */}
+            <div
+              className="acceuil-dropdown-wrapper"
+              ref={dropdownRef}
+            >
+              <button
+                type="button"
+                className="acceuil-dropdown-button"
+                onClick={() => setOpen((prev) => !prev)}
+              >
+                prendre rendez-vous
+                <span
+                  className={`acceuil-dropdown-arrow ${
+                    open ? "up" : ""
+                  }`}
+                >
+                  ▾
+                </span>
+              </button>
+
+              {open && (
+                <div className="acceuil-dropdown-menu">
+                  <Link
+                    className="acceuil-dropdown-item"
+                    to="/request?type=particulier"
+                    onClick={() => setOpen(false)}
+                  >
+                    Particulier
+                  </Link>
+
+                  <Link
+                    className="acceuil-dropdown-item"
+                    to="/request?type=entreprise"
+                    onClick={() => setOpen(false)}
+                  >
+                    Entreprise
+                  </Link>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       </div>
 
-      {/* --- SECTION DES SERVICES (4 COLONNES) --- */}
-       <div className="services-section">
-
+      {/* SERVICES */}
+      <div className="services-section">
         <div className="services-grid">
 
           <div className="service-item">
@@ -69,21 +155,26 @@ export default function Accueil() {
         </div>
       </div>
 
-      {/* --- BARRE DE RÉASSURANCE DU BAS --- */}
+      {/* REASSURANCE */}
       <div className="reassurance-bar">
         <div className="reassurance-content">
+
           <div className="reassurance-item">
-            <span>🛡️</span> <span>Résultat impeccable</span>
+            🛡️ Résultat impeccable
           </div>
+
           <div className="reassurance-item">
-            <span>🕵️‍♂️</span> <span>Intervention discrète</span>
+            🕵️‍♂️ Intervention discrète
           </div>
+
           <div className="reassurance-item">
-            <span>🧪</span> <span>Produits professionnels</span>
+            🧪 Produits professionnels
           </div>
+
           <div className="reassurance-item">
-            <span>🎯</span> <span>Service sur mesure</span>
+            🎯 Service sur mesure
           </div>
+
         </div>
       </div>
 

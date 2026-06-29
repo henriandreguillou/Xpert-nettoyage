@@ -21,7 +21,6 @@ export default function ServicesList() {
           </div>
           <div className="service-content">
             <div className="service-header">
-              <span>🏔️</span>
               <h3 className="services-title">Entretien textile d'hébergements</h3>
             </div>
             <p className="service-description">
@@ -38,7 +37,6 @@ export default function ServicesList() {
           </div>
           <div className="service-content">
             <div className="service-header">
-              <span>🛋️</span>
               <h3 className="services-title">Canapés & fauteuils</h3>
             </div>
             <p className="service-description">
@@ -55,7 +53,6 @@ export default function ServicesList() {
           </div>
           <div className="service-content">
             <div className="service-header">
-              <span>🛏️</span>
               <h3 className="services-title">Matelas & literie</h3>
             </div>
             <p className="service-description">
@@ -72,7 +69,6 @@ export default function ServicesList() {
           </div>
           <div className="service-content">
             <div className="service-header">
-              <span>🪑</span>
               <h3 className="services-title">Chaises & assises textiles</h3>
             </div>
             <p className="service-description">
@@ -88,7 +84,6 @@ export default function ServicesList() {
           </div>
           <div className="service-content">
             <div className="service-header">
-              <span>🧶</span>
               <h3 className="services-title">Tapis & textiles décoratifs</h3>
             </div>
             <p className="service-description">
@@ -105,7 +100,6 @@ export default function ServicesList() {
           </div>
           <div className="service-content">
             <div className="service-header">
-              <span>✨</span>
               <h3 className="services-title">Tâches & odeurs persistantes</h3>
             </div>
             <p className="service-description">
