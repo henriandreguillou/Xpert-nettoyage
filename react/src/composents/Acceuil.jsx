@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import backgroundImg from "../assets/acceuil.png";
 import { Link, useLocation } from "react-router-dom";
 import "../style-css/acceuil.css";
@@ -10,45 +10,24 @@ import {
 } from "react-icons/fa";
 
 export default function Accueil() {
-  const [open, setOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const dropdownRef = useRef(null);
   const location = useLocation();
 
-  // Reset à chaque changement de page
+  // reset menu à chaque navigation
   useEffect(() => {
-    setOpen(false);
     setIsMenuOpen(false);
   }, [location]);
 
-  // click outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // ESC
+  // ESC pour fermer menu burger
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") {
-        setOpen(false);
         setIsMenuOpen(false);
       }
     };
 
     document.addEventListener("keydown", handleEsc);
-    return () =>
-      document.removeEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
   return (
@@ -79,46 +58,10 @@ export default function Accueil() {
               Nos Services
             </Link>
 
-            {/* DROPDOWN RENDEZ-VOUS */}
-            <div
-              className="acceuil-dropdown-wrapper"
-              ref={dropdownRef}
-            >
-              <button
-                type="button"
-                className="acceuil-dropdown-button"
-                onClick={() => setOpen((prev) => !prev)}
-              >
-                prendre rendez-vous
-                <span
-                  className={`acceuil-dropdown-arrow ${
-                    open ? "up" : ""
-                  }`}
-                >
-                  ▾
-                </span>
-              </button>
-
-              {open && (
-                <div className="acceuil-dropdown-menu">
-                  <Link
-                    className="acceuil-dropdown-item"
-                    to="/request?type=particulier"
-                    onClick={() => setOpen(false)}
-                  >
-                    Particulier
-                  </Link>
-
-                  <Link
-                    className="acceuil-dropdown-item"
-                    to="/request?type=entreprise"
-                    onClick={() => setOpen(false)}
-                  >
-                    Entreprise
-                  </Link>
-                </div>
-              )}
-            </div>
+            {/* SIMPLE LINK (remplace dropdown) */}
+            <Link className="acceuil-dropdown-button" to="/request">
+              Prendre rendez-vous
+            </Link>
 
           </div>
         </div>
@@ -159,21 +102,10 @@ export default function Accueil() {
       <div className="reassurance-bar">
         <div className="reassurance-content">
 
-          <div className="reassurance-item">
-            🛡️ Résultat impeccable
-          </div>
-
-          <div className="reassurance-item">
-            🕵️‍♂️ Intervention discrète
-          </div>
-
-          <div className="reassurance-item">
-            🧪 Produits professionnels
-          </div>
-
-          <div className="reassurance-item">
-            🎯 Service sur mesure
-          </div>
+          <div className="reassurance-item">🛡️ Résultat impeccable</div>
+          <div className="reassurance-item">🕵️‍♂️ Intervention discrète</div>
+          <div className="reassurance-item">🧪 Produits professionnels</div>
+          <div className="reassurance-item">🎯 Service sur mesure</div>
 
         </div>
       </div>

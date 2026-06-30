@@ -1,0 +1,212 @@
+const pool = require('../config/db');
+
+
+
+
+
+/////////////////////////
+//// ** GET ** ////
+////////////////////////
+
+
+
+/////////////////////////
+//// ** POST ** ////
+////////////////////////
+
+const createAppointment = async (req, res) => {
+  try {
+    console.log("BODY:", req.body);
+
+    const {
+      request_num_rq,
+      date_rdv,
+      heure_rdv,
+      admin_id
+    } = req.body;
+
+    // 🔥 1. Validation des champs obligatoires
+    if (!request_num_rq || !date_rdv || !heure_rdv || !admin_id) {
+      return res.status(400).json({
+        message: "Tous les champs obligatoires doivent être remplis (request_num_rq, date_rdv, heure_rdv, admin_id)"
+      });
+    }
+
+    // 🔥 2. Vérifier si la request existe (évite de violer la contrainte fk_request_num_rq)
+    const checkRequestQuery = "SELECT num_rq FROM request WHERE num_rq = $1";
+    const checkRequestResult = await pool.query(checkRequestQuery, [request_num_rq.trim()]);
+
+    if (checkRequestResult.rows.length === 0) {
+      return res.status(404).json({
+        message: `La demande avec le numéro '${request_num_rq}' n'existe pas.`
+      });
+    }
+
+    // 🔥 3. Check disponibilité du créneau (date_appointment et heure_appointment)
+    const checkSlotQuery = `
+      SELECT id FROM appointment
+      WHERE date_appointment = $1 AND heure_appointment = $2
+    `;
+    const checkSlotResult = await pool.query(checkSlotQuery, [date_rdv, heure_rdv]);
+
+    if (checkSlotResult.rows.length > 0) {
+      return res.status(400).json({
+        message: "Ce créneau horaire est déjà réservé"
+      });
+    }
+
+    // ==========================================
+    // 4. INSERTION DANS LA TABLE APPOINTMENT
+    // ==========================================
+    // Note : On ne passe pas 'status' car il prend sa valeur par défaut 'en attente'
+    const insertAppointmentQuery = `
+      INSERT INTO appointment (
+        request_num_rq,
+        admin_id,
+        date_appointment,
+        heure_appointment
+      )
+      VALUES ($1, $2, $3, $4)
+      RETURNING id
+    `;
+
+    const appointmentValues = [
+      request_num_rq.trim(),
+      admin_id,
+      date_rdv,
+      heure_rdv
+    ];
+
+    const insertResult = await pool.query(insertAppointmentQuery, appointmentValues);
+    const newAppointmentId = insertResult.rows[0].id;
+
+    // ==========================================
+    // 5. DOUBLE JOINTURE POUR LE RETOUR DE DONNÉES
+    // ==========================================
+  const selectJoinedQuery = `
+  SELECT 
+    a.id AS appointment_id,
+    a.date_appointment,
+    a.heure_appointment,
+    a.status AS appointment_status,
+    a.created_at AS appointment_created_at,
+    
+    -- Groupe toutes les infos de la requête dans un sous-objet 'request'
+    json_build_object(
+      'id', r.id,
+      'num_rq', r.num_rq,
+      'nom', r.nom,
+      'prenom', r.prenom,
+      'email', r.email,
+      'phone', r.phone,
+      'adresse', r.adresse,
+      'ville', r.ville,
+      'code_postal', r.code_postal,
+      'complement_adresse', r.complement_adresse,
+      'piece_jointe', r.piece_jointe,
+      'created_at', r.created_at
+    ) AS request,
+
+    -- Groupe les infos de l'admin dans un sous-objet 'admin'
+    json_build_object(
+      'id', adm.id,
+      'nom', adm.nom,
+      'prenom', adm.prenom,
+      'email', adm.email
+    ) AS admin
+
+  FROM appointment a
+  LEFT JOIN request r ON a.request_num_rq = r.num_rq
+  LEFT JOIN admin adm ON a.admin_id = adm.id
+  WHERE a.id = $1
+  `;
+
+    const appointmentResult = await pool.query(selectJoinedQuery, [newAppointmentId]);
+
+    // Réponse finale propre
+    return res.status(201).json({
+      message: "Rendez-vous créé avec succès",
+      appointment: appointmentResult.rows[0]
+    });
+
+  } catch (error) {
+    console.error("🔥 POSTGRES ERROR:", error);
+
+    // Gestion propre d'une erreur de clé étrangère admin si l'ID n'existe pas
+    if (error.code === "23503" && error.constraint === "fk_admin") {
+      return res.status(404).json({
+        message: "L'administrateur (admin_id) spécifié n'existe pas."
+      });
+    }
+
+    return res.status(500).json({
+      message: "Erreur lors de la création du rendez-vous",
+      error: error.message
+    });
+  }
+};
+/////////////////////////
+//// ** UPDATE ** ////
+////////////////////////
+
+
+
+/////////////////////////
+//// ** DELETE ** ////
+////////////////////////
+
+
+
+/////////////////////////
+//// ** GET BY DATE ** ////
+////////////////////////
+
+const getTakenHoursByDate = async (req, res) => {
+  try {
+    const { date } = req.params;
+
+    // Validation simple
+    if (!date) {
+      return res.status(400).json({
+        message: "Date manquante"
+      });
+    }
+
+    // 🔥 Récupérer les heures déjà prises
+    const query = `
+      SELECT heure_rdv
+      FROM rendezvous
+      WHERE date_rdv = $1
+    `;
+
+    const result = await pool.query(query, [date]);
+
+    // 🔥 format propre des heures (08:00)
+    const takenHours = result.rows.map((row) =>
+      row.heure_rdv.slice(0, 5)
+    );
+
+    return res.status(200).json({
+      message: "Heures récupérées avec succès",
+      data: takenHours
+    });
+
+  } catch (error) {
+    console.error("🔥 POSTGRES ERROR:", error);
+
+    return res.status(500).json({
+      message: "Erreur lors de la récupération des heures",
+      error: error.message
+    });
+  }
+};
+
+
+module.exports = {
+  createAppointment,
+  getTakenHoursByDate
+};
+
+
+
+

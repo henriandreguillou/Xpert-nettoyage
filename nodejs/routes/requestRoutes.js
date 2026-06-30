@@ -4,7 +4,10 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 
-const { createRequest } = require("../controllers/requestController");
+const { createRequest,
+        getAllRequests,
+        getRequestByNum
+ } = require("../controllers/requestController");
 
 // =========================
 // CONFIG MULTER
@@ -25,7 +28,8 @@ const upload = multer({ storage });
 // ROUTE
 // =========================
 
-// POST /request
 router.post("/", upload.single("piece_jointe"), createRequest);
+router.get("/", getAllRequests);
+router.get("/:num_rq", getRequestByNum);
 
 module.exports = router;

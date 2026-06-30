@@ -17,7 +17,6 @@ const createRequest = async (req, res) => {
     console.log("FILE:", req.file);
 
     const {
-      type_client,
       nom,
       prenom,
       email,
@@ -31,7 +30,6 @@ const createRequest = async (req, res) => {
     const piece_jointe = req.file ? req.file.filename : null;
 
     if (
-      !type_client ||
       !nom ||
       !email ||
       !phone ||
@@ -44,13 +42,7 @@ const createRequest = async (req, res) => {
       });
     }
 
-    if (type_client === "particulier" && !prenom) {
-      return res.status(400).json({
-        message: "Le prénom est obligatoire pour un particulier"
-      });
-    }
-
-    // 🔥 CODE UNIQUE num_rq
+    // Génération d'un numéro de demande unique
     let num_rq;
     let exists = true;
 
@@ -68,7 +60,6 @@ const createRequest = async (req, res) => {
     const query = `
       INSERT INTO request (
         num_rq,
-        type_client,
         nom,
         prenom,
         email,
@@ -79,15 +70,14 @@ const createRequest = async (req, res) => {
         complement_adresse,
         piece_jointe
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       RETURNING *
     `;
 
     const values = [
       num_rq,
-      type_client.trim(),
       nom.trim(),
-      type_client === "particulier" ? prenom?.trim() : null,
+      prenom?.trim() || null,
       email.trim().toLowerCase(),
       phone.trim(),
       adresse.trim(),
@@ -114,6 +104,62 @@ const createRequest = async (req, res) => {
   }
 };
 
-module.exports = {
-  createRequest
+
+const getAllRequests = async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM request ORDER BY id DESC"
+    );
+
+    return res.status(200).json({
+      message: "Liste des requests",
+      data: result.rows
+    });
+
+  } catch (error) {
+    console.error("🔥 ERROR:", error);
+
+    return res.status(500).json({
+      message: "Erreur serveur",
+      error: error.message
+    });
+  }
 };
+
+const getRequestByNum = async (req, res) => {
+  try {
+    const { num_rq } = req.params;
+
+    const result = await pool.query(
+      "SELECT * FROM request WHERE num_rq = $1",
+      [num_rq]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "Request introuvable"
+      });
+    }
+
+    return res.status(200).json({
+      message: "Request trouvée",
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("🔥 ERROR:", error);
+
+    return res.status(500).json({
+      message: "Erreur serveur",
+      error: error.message
+    });
+  }
+};
+
+
+
+module.exports = {
+  createRequest,
+  getAllRequests,
+  getRequestByNum
+};  

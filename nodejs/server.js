@@ -39,8 +39,8 @@ app.get("/", (req, res) => {
 // ======================
 // ROUTES
 // ======================
-const rendezvousRoutes = require("./routes/rendezvousRoutes");
-app.use("/rendezvous", rendezvousRoutes);
+const appointmentRoutes = require("./routes/appointmentRoutes");
+app.use("/appointment", appointmentRoutes);
 
 const requestRoutes = require("./routes/requestRoutes");
 app.use("/request", requestRoutes);

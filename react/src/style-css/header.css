@@ -1,9 +1,12 @@
 /* header.css */
 
-/* --- RESET & VARIABLES DE BASE --- */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+/* ---------- HEADER ---------- */
+
 .header {
   width: 100%;
-  background-color: #ffffff;
+  background: #ffffff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -13,72 +16,76 @@
 
 .nav {
   max-width: 2000px;
-  margin: 2px auto;
+  margin: 0 auto;
   padding: 16px 24px;
+
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+
   position: relative;
 }
 
-/* --- LOGO --- */
+/* ---------- LOGO ---------- */
+
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
   color: #1a1a1a;
 }
 
-.logo-icon {
-  background-color: #f4cb48;
-  color: #1a1a1a;
-  font-weight: 700;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  letter-spacing: 0.05em;
+.logo-image {
+  width: 70px;
+  height: auto;
+  border-radius: 50%;
 }
 
 .logo-text {
-  font-weight: 700;
   font-size: 1rem;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: .08em;
 }
 
-/* --- BOUTON BURGER (Masqué par défaut sur PC) --- */
+/* ---------- BURGER ---------- */
+
 .burger-menu {
   display: none;
   flex-direction: column;
   justify-content: space-between;
+
   width: 24px;
   height: 18px;
+
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
+
   z-index: 1100;
 }
 
 .burger-menu span {
   width: 100%;
   height: 2px;
-  background-color: #1a1a1a;
-  transition: all 0.3s ease;
+  background: #1a1a1a;
+  transition: .3s;
 }
 
-/* Animation du burger en "X" quand il est actif */
 .burger-menu.active span:nth-child(1) {
   transform: translateY(8px) rotate(45deg);
 }
+
 .burger-menu.active span:nth-child(2) {
   opacity: 0;
 }
+
 .burger-menu.active span:nth-child(3) {
   transform: translateY(-8px) rotate(-45deg);
 }
 
-/* --- CONFIGURATION NAVIGATION DESKTOP (Écrans larges) --- */
+/* ---------- NAVIGATION ---------- */
+
 .nav-navigation-wrapper {
   display: flex;
   align-items: center;
@@ -95,144 +102,104 @@
 .nav-link {
   text-decoration: none;
   color: #4a4a4a;
-  font-size: 0.9rem;
+  font-size: .9rem;
   font-weight: 500;
-  transition: color 0.2s ease;
-  position: relative;
+  transition: .25s;
 }
 
 .nav-link:hover {
   color: #a38a5e;
 }
 
-/* --- DROPDOWN BOUTON & MENU --- */
-.dropdown-wrapper {
-  position: relative;
-  margin-left: auto; /* pousse le bouton complètement à droite */
-}
+/* ---------- BOUTON RDV ---------- */
 
 .dropdown-button {
-  background-color: #c8a96a;
-  color: #ffffff;
-  border: none;
-  padding: 20px 20px;
-  font-size: 1rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  border-radius: 4px;
-  cursor: pointer;
+  margin-left: auto;
+
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: background-color 0.2s ease;
+  justify-content: center;
+
+  text-decoration: none;
+
+  background: #c8a96a;
+  color: white;
+
+  padding: 16px 22px;
+
+  border-radius: 4px;
+
+  font-size: .9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  transition: .25s;
 }
 
 .dropdown-button:hover {
-  background-color: #8e764d;
+  background: #8e764d;
+  color: white;
 }
 
-.arrow {
-  display: inline-block;
-  transition: transform 0.2s ease;
-}
+/* ---------- RESPONSIVE ---------- */
 
-.arrow.up {
-  transform: rotate(180deg);
-}
+@media (max-width:900px) {
 
-.dropdown {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background-color: #ffffff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-  min-width: 160px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #f0f0f0;
-}
-
-.dropdown-item {
-  text-decoration: none;
-  color: #2d2d2d;
-  padding: 12px 16px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.dropdown-item:hover {
-  background-color: #f9f9f9;
-  color: #a38a5e;
-}
-
-
-/* --- CSS RESPONSIVE (Tablettes et Mobiles : moins de 900px) --- */
-@media (max-width: 900px) {
   .burger-menu {
-    display: flex; /* On affiche le burger */
+    display: flex;
   }
 
-  /* Transformation de la navigation en tiroir coulissant */
   .nav-navigation-wrapper {
     position: fixed;
+
     top: 0;
-    right: -100%; /* Caché à droite de l'écran par défaut */
+    right: -100%;
+
     width: 280px;
     height: 100vh;
-    background-color: #ffffff;
-    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+
+    background: white;
+
+    box-shadow: -5px 0 20px rgba(0,0,0,.12);
+
+    display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: flex-start;
+
     gap: 40px;
-    padding: 80px 32px 40px 32px;
-    margin-left: 0;
-    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+    padding: 90px 30px;
+
+    transition: right .35s ease;
   }
 
-  /* Quand on clique sur le burger, le menu arrive sur l'écran */
   .nav-navigation-wrapper.show-menu {
     right: 0;
   }
 
   .nav-links-group {
+    width: 100%;
+
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 100%;
-    gap: 24px;
+
+    gap: 20px;
   }
 
   .nav-link {
-    font-size: 1.1rem;
     width: 100%;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f4f4f4;
-  }
-
-  .dropdown-wrapper {
-    width: 100%;
+    font-size: 1.05rem;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ececec;
   }
 
   .dropdown-button {
     width: 100%;
-    justify-content: space-between;
-    padding: 12px 16px;
+    margin-left: 0;
 
-  }
+    padding: 15px;
 
-  .dropdown {
-    position: static; /* Le dropdown s'insère directement sous le bouton au lieu de flotter */
-    box-shadow: none;
-    border: none;
-    background-color: #f9f9f9;
-    margin-top: 8px;
-    width: 100%;
-  }
-  
-  .dropdown-item {
-    padding: 12px 24px;
+    justify-content: center;
   }
 }
