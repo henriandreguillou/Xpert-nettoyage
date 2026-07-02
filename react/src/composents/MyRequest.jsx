@@ -6,7 +6,7 @@ import {
   useSearchParams
 } from "react-router-dom";
 
-const MesRendezvous = () => {
+export default function MesRendezvous () {
 
   const [numRdv, setNumRdv] = useState("");
   const [rendezvous, setRendezvous] = useState(null);
@@ -149,4 +149,3 @@ const MesRendezvous = () => {
   );
 };
 
-export default MesRendezvous;

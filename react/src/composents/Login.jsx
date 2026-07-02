@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../style-css/login.css" 
 
-const Login = () => {
+export default function Login () {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -80,5 +80,3 @@ const Login = () => {
     </div>
   );
 };
-
-export default Login;

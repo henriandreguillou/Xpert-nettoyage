@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.jpeg";
 import "../style-css/headerAdmin.css";
 
-function HeaderAdmin() {
+export default function HeaderAdmin() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [admin, setAdmin] = useState(null);
   const [openProfile, setOpenProfile] = useState(false);
@@ -70,6 +70,8 @@ function HeaderAdmin() {
             <Link className="nav-link" to="/admin/calendar">
               Planning
             </Link>
+
+            <Link className="nav-link" to="/admin/appointment" >Créer un rendez-vous</Link>
 
             <Link className="nav-link" to="/">
               Retour au site
@@ -139,5 +141,3 @@ function HeaderAdmin() {
     </header>
   );
 }
-
-export default HeaderAdmin;

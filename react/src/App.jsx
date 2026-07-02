@@ -2,18 +2,19 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Request from "./composents/Request";
 import Accueil from "./composents/Acceuil";
-import MyRequest from "./composents/MyRequest";
-import ModifierRendezvous from "./composents/ModifierRendezvous";
 import Header from "./composents/Header";
-import HeaderAdmin from "./composents/HeaderAdmin";
 import Footer from "./composents/Footer";
-import CalendarRdv from "./composents/Calendar";
-import AdminRoute from "./composents/AdminRoute";
-import Login from "./composents/Login";
-import AdminProfile from "./composents/AdminProfile";
 import About from "./composents/About";
 import Contact from "./composents/Contact"
 import Services from "./composents/Services";
+import Tarifs from "./composents/Tarifs";
+
+import Login from "./composents/Login";
+import HeaderAdmin from "./composents/HeaderAdmin";
+import CalendarRdv from "./composents/Calendar";
+import CreateAppointment from "./composents/CreateAppointment";
+import AdminRoute from "./composents/AdminRoute";
+import AdminProfile from "./composents/AdminProfile";
 
 
 function Layout() {
@@ -36,12 +37,12 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Accueil />} />
           <Route path="/request" element={<Request />} />
-          <Route path="/myrequest" element={<MyRequest />} />
-          <Route path="/modifier/:num_rdv" element={<ModifierRendezvous />} />
           <Route path="/login" element={<Login />} />
           <Route path="/about" element={<About />} />
           <Route path="/Services" element={<Services/>} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/tarifs" element={<Tarifs />} />
+
 
 
           <Route
@@ -51,6 +52,14 @@ function Layout() {
                 <CalendarRdv />
               </AdminRoute>
             }
+          />
+
+          <Route
+            path="/admin/appointment"
+            element={
+            <AdminRoute>
+              <CreateAppointment/>  
+            </AdminRoute>}
           />
 
           <Route

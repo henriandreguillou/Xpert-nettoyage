@@ -70,6 +70,10 @@ export default function Header() {
             <Link className="nav-link" to="/contact">
               Nous contacter
             </Link>
+
+            <Link className="nav-link" to="/tarifs">
+              Tarifs
+            </Link>
           </div>
 
           {/* BOUTON PRENDRE RENDEZ-VOUS */}

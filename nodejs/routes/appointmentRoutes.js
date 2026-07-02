@@ -13,7 +13,7 @@ const {
   res.json({ message: "OK rendezvous" });
 });*/
 
-router.post('/', createAppointment);
+router.post('/', verifyAdmin, createAppointment);
 router.get("/heures/:date", verifyAdmin, getTakenHoursByDate);
 
 module.exports = router; 

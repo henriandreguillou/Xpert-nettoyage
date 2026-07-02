@@ -38,10 +38,31 @@ export default function Footer() {
           <div className="footer-section">
             <h3>Liens rapides</h3>
             <ul className="footer-links">
-              <li><a href="/">Accueil</a></li>
-              <li><a href="/services">Services</a></li>
-              <li><a href="/about">À propos</a></li>
-              <li><a href="/contact">Contact</a></li>
+              <li>
+                <Link className="nav-link" to="/">
+                  Accueil
+                </Link>
+              </li>
+              <li>
+                <Link className="nav-link" to="/services">
+                  Services
+                </Link>
+              </li>
+              <li>
+                <Link className="nav-link" to="/about">
+                  À propos
+                </Link>
+              </li>
+              <li>
+                <Link className="nav-link" to="/contact">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link className="nav-link" to="/tarifs">
+                  Tarifs
+                </Link>
+              </li>
             </ul>
           </div>
 
