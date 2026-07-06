@@ -3,10 +3,6 @@
   min-height: 100vh;
   /* Option 1 : Si vous passez l'image via une variable CSS (recommandé pour React) */
   background-image: linear-gradient(rgba(18, 18, 18, 0.9), rgba(18, 18, 18, 0.9)), var(--bg-image, #121212);
-  
-  /* Option 2 alternative : Si vous préférez un chemin relatif direct dans le CSS (décommentez la ligne ci-dessous si nécessaire) */
-  /* background-image: linear-gradient(rgba(18, 18, 18, 0.9), rgba(18, 18, 18, 0.9)), url('../assets/acceuil.png'); */
-  
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -66,15 +62,15 @@
 /* Conteneur de texte à droite */
 .service-content {
   flex: 1;
-  min-width: 0; /* Empêche le texte de casser la mise en page flex */
-  width: 100%;  /* Prend toute la largeur disponible sur mobile */
+  min-width: 0;
+  width: 100%; 
 }
 
 /* Ligne de titre (Emoji + Texte) */
 .service-header {
   display: flex;
   align-items: center;
-  justify-content: center; /* Centre le header (emoji + titre) sur mobile */
+  justify-content: center; 
   gap: 8px;
   color: #ffffff;
   font-size: 1rem;
@@ -87,15 +83,13 @@
   font-size: 1.05rem;
   font-weight: 600;
   color: #ffffff;
-  /* On autorise le retour à la ligne sur mobile pour éviter que le titre soit coupé brutalement */
   white-space: normal; 
 }
 
-/* Description textuelle */
 .service-description {
   margin: 8px 0 0 0;
-  font-size: 0.875rem; /* 14px */
-  color: #a0a0a0; /* Légèrement éclairci pour une meilleure lisibilité sur fond sombre */
+  font-size: 0.875rem;
+  color: #a0a0a0;
   line-height: 1.5;
   overflow: hidden;
 }

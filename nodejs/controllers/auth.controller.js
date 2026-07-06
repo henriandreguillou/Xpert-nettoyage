@@ -68,10 +68,10 @@ exports.loginAdmin = async (req, res) => {
 };
 
 
-
 exports.updateAdmin = async (req, res) => {
-  const { id } = req.params;
-  const { email, password } = req.body;
+  const id = req.user.id; // ✅ FIX IMPORTANT
+
+  const { email, password, nom, prenom } = req.body;
 
   try {
     const result = await pool.query(
@@ -96,14 +96,19 @@ exports.updateAdmin = async (req, res) => {
     const updatedAdmin = await pool.query(
       `
       UPDATE admin
-      SET email = $1,
-          password_hash = $2
-      WHERE id = $3
-      RETURNING id, email
+      SET 
+        email = $1,
+        password_hash = $2,
+        nom = $3,
+        prenom = $4
+      WHERE id = $5
+      RETURNING id, email, nom, prenom
       `,
       [
         email || admin.email,
         passwordHash,
+        nom || admin.nom,
+        prenom || admin.prenom,
         id,
       ]
     );
@@ -112,6 +117,7 @@ exports.updateAdmin = async (req, res) => {
       message: "Administrateur mis à jour avec succès",
       admin: updatedAdmin.rows[0],
     });
+
   } catch (err) {
     console.error("UPDATE ADMIN ERROR:", err);
 
@@ -120,7 +126,6 @@ exports.updateAdmin = async (req, res) => {
     });
   }
 };
-
 exports.getAdminProfile = async (req, res) => {
   try {
     const adminId = req.user.id;

@@ -169,7 +169,7 @@ export default function TarifsPage() {
             <div className="card-text-block">
               <h4>VOUS GÉREZ PLUSIEURS LOGEMENTS OU SOUHAITEZ UN ENTRETIEN RÉGULIER ?</h4>
               <p>Nous proposons des conditions tarifaires adaptées aux professionnels et aux interventions récurrentes.</p>
-              <a href="#contact" className="card-accent-link">Étude personnalisée sur demande.</a>
+              <p className="card-accent-link">Étude personnalisée sur demande.</p>
             </div>
           </div>
 

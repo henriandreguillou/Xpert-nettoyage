@@ -15,6 +15,7 @@ import CalendarRdv from "./composents/Calendar";
 import CreateAppointment from "./composents/CreateAppointment";
 import AdminRoute from "./composents/AdminRoute";
 import AdminProfile from "./composents/AdminProfile";
+import EditAdmin from "./composents/EditAdmin"
 
 
 function Layout() {
@@ -67,6 +68,15 @@ function Layout() {
             element={
               <AdminRoute>
                 <AdminProfile/>
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="/admin/profile/edit"
+            element={
+              <AdminRoute>
+                <EditAdmin/>
               </AdminRoute>
             }
           />

@@ -5,12 +5,6 @@ const pool = require('../config/db');
 
 
 /////////////////////////
-//// ** GET ** ////
-////////////////////////
-
-
-
-/////////////////////////
 //// ** POST ** ////
 ////////////////////////
 
@@ -178,37 +172,76 @@ const getTakenHoursByDate = async (req, res) => {
   try {
     const { date } = req.params;
 
-    // Validation simple
     if (!date) {
       return res.status(400).json({
-        message: "Date manquante"
+        message: "La date est obligatoire."
       });
     }
 
-    // 🔥 Récupérer les heures déjà prises
     const query = `
-      SELECT heure_rdv
-      FROM rendezvous
-      WHERE date_rdv = $1
+      SELECT
+        id,
+        heure_appointment,
+        status
+      FROM appointment
+      WHERE date_appointment = $1
+      ORDER BY heure_appointment ASC
     `;
 
     const result = await pool.query(query, [date]);
 
-    // 🔥 format propre des heures (08:00)
-    const takenHours = result.rows.map((row) =>
-      row.heure_rdv.slice(0, 5)
-    );
-
     return res.status(200).json({
-      message: "Heures récupérées avec succès",
-      data: takenHours
+      date,
+      takenHours: result.rows
     });
 
   } catch (error) {
     console.error("🔥 POSTGRES ERROR:", error);
 
     return res.status(500).json({
-      message: "Erreur lors de la récupération des heures",
+      message: "Erreur lors de la récupération des créneaux.",
+      error: error.message
+    });
+  }
+};
+
+const getAppointmentsForCalendar = async (req, res) => {
+  try {
+    const query = `
+      SELECT
+        a.id,
+        a.date_appointment AS date_rdv,
+        a.heure_appointment AS heure_rdv,
+        a.status,
+
+        r.num_rq,
+        r.nom,
+        r.prenom,
+        r.email,
+        r.phone,
+        r.adresse,
+        r.complement_adresse,
+        r.code_postal,
+        r.ville
+
+      FROM appointment a
+      INNER JOIN request r
+        ON a.request_num_rq = r.num_rq
+
+      ORDER BY
+        a.date_appointment ASC,
+        a.heure_appointment ASC;
+    `;
+
+    const result = await pool.query(query);
+
+    return res.status(200).json(result.rows);
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Erreur lors de la récupération des rendez-vous.",
       error: error.message
     });
   }
@@ -217,7 +250,8 @@ const getTakenHoursByDate = async (req, res) => {
 
 module.exports = {
   createAppointment,
-  getTakenHoursByDate
+  getTakenHoursByDate,
+  getAppointmentsForCalendar
 };
 
 

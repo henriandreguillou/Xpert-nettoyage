@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import backgroundImg from "../assets/acceuil.png";
+import image1 from "../assets/1.png";
+import image2 from "../assets/2.png";
 import { Link, useLocation } from "react-router-dom";
 import "../style-css/acceuil.css";
 import {
@@ -33,9 +34,7 @@ export default function Accueil() {
   return (
     <div className="accueil-container">
 
-      {/* décor */}
-      <div className="decor-vague-gauche"></div>
-      <div className="decor-vague-bas"></div>
+
 
       {/* HERO */}
       <div className="hero-section">
@@ -53,17 +52,15 @@ export default function Accueil() {
           </p>
 
           <div className="button-group">
-
-            <Link className="btn btn-secondary" to="/services">
+            <Link className="btn btn-services" to="/services">
               Nos Services
             </Link>
 
-            {/* SIMPLE LINK (remplace dropdown) */}
-            <Link className="acceuil-dropdown-button" to="/request">
+            <Link className="btn btn-rdv" to="/request">
               Prendre rendez-vous
             </Link>
-
           </div>
+
         </div>
       </div>
 
@@ -108,6 +105,21 @@ export default function Accueil() {
           <div className="reassurance-item">🎯 Service sur mesure</div>
 
         </div>
+      </div>
+
+      {/* IMAGES EN BAS */}
+      <div className="bottom-images">
+        <img
+          src={image1}
+          alt="Illustration 1"
+          className="bottom-image"
+        />
+
+        <img
+          src={image2}
+          alt="Illustration 2"
+          className="bottom-image"
+        />
       </div>
 
     </div>

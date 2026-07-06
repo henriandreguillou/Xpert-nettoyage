@@ -321,7 +321,7 @@
 }
 
 .card-accent-link {
-  color: var(--elegant-gold);
+  color: var(--elegant-gold)!important;
   font-size: 0.78rem;
   font-weight: 600;
   text-decoration: underline;

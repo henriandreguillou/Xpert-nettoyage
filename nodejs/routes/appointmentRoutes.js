@@ -6,6 +6,7 @@ const verifyAdmin = require("../middleware/auth.middleware");
 const {
   createAppointment,
   getTakenHoursByDate,
+  getAppointmentsForCalendar,
 } = require('../controllers/appointmentController');
 
 
@@ -15,5 +16,6 @@ const {
 
 router.post('/', verifyAdmin, createAppointment);
 router.get("/heures/:date", verifyAdmin, getTakenHoursByDate);
+router.get("/calendar", getAppointmentsForCalendar)
 
 module.exports = router; 
