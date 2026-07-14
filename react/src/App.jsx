@@ -16,6 +16,8 @@ import CreateAppointment from "./composents/CreateAppointment";
 import AdminRoute from "./composents/AdminRoute";
 import AdminProfile from "./composents/AdminProfile";
 import EditAdmin from "./composents/EditAdmin"
+import RequestsPage from "./composents/AllRequest";
+
 
 
 function Layout() {
@@ -80,6 +82,14 @@ function Layout() {
               </AdminRoute>
             }
           />
+
+           <Route
+            path="/admin/request"
+             element={
+              <AdminRoute>
+              <RequestsPage />
+              </AdminRoute>
+            } />
 
         </Routes>
         

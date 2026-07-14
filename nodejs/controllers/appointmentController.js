@@ -1,14 +1,10 @@
 const pool = require('../config/db');
 
 
-
-
-
-/////////////////////////
-//// ** POST ** ////
-////////////////////////
-
 const createAppointment = async (req, res) => {
+  // On récupère un client du pool pour gérer la transaction de manière sécurisée
+  const client = await pool.connect();
+
   try {
     console.log("BODY:", req.body);
 
@@ -21,10 +17,13 @@ const createAppointment = async (req, res) => {
 
     // 🔥 1. Validation champs obligatoires
     if (!request_num_rq || !date_rdv || !heure_rdv || !admin_id) {
+      client.release();
       return res.status(400).json({
         message: "Tous les champs sont obligatoires (request_num_rq, date_rdv, heure_rdv, admin_id)"
       });
     }
+
+    const cleanRequestNum = request_num_rq.trim();
 
     // 🔥 2. Vérifier existence request
     const checkRequestQuery = `
@@ -33,11 +32,10 @@ const createAppointment = async (req, res) => {
       WHERE num_rq = $1
     `;
 
-    const checkRequestResult = await pool.query(checkRequestQuery, [
-      request_num_rq.trim()
-    ]);
+    const checkRequestResult = await client.query(checkRequestQuery, [cleanRequestNum]);
 
     if (checkRequestResult.rows.length === 0) {
+      client.release();
       return res.status(404).json({
         message: `La demande '${request_num_rq}' n'existe pas.`
       });
@@ -51,18 +49,19 @@ const createAppointment = async (req, res) => {
       AND heure_appointment = $2
     `;
 
-    const checkSlotResult = await pool.query(checkSlotQuery, [
-      date_rdv,
-      heure_rdv
-    ]);
+    const checkSlotResult = await client.query(checkSlotQuery, [date_rdv, heure_rdv]);
 
     if (checkSlotResult.rows.length > 0) {
+      client.release();
       return res.status(400).json({
         message: "Ce créneau est déjà réservé"
       });
     }
 
-    // 🔥 4. INSERT avec status = "programmé"
+    // --- DEBUT DE LA TRANSACTION ---
+    await client.query('BEGIN');
+
+    // 🔥 4. INSERT avec status = "programmé" dans appointment
     const insertAppointmentQuery = `
       INSERT INTO appointment (
         request_num_rq,
@@ -76,19 +75,28 @@ const createAppointment = async (req, res) => {
     `;
 
     const appointmentValues = [
-      request_num_rq.trim(),
+      cleanRequestNum,
       admin_id,
       date_rdv,
       heure_rdv,
       "programmé"
     ];
 
-    const insertResult = await pool.query(
-      insertAppointmentQuery,
-      appointmentValues
-    );
-
+    const insertResult = await client.query(insertAppointmentQuery, appointmentValues);
     const newAppointmentId = insertResult.rows[0].id;
+
+    // 🔥 NOUVEAU - 4b. Mettre à jour le statut dans la table request en "programmé"
+    const updateRequestStatusQuery = `
+      UPDATE request
+      SET status = 'programmé'
+      WHERE num_rq = $1
+    `;
+    
+    await client.query(updateRequestStatusQuery, [cleanRequestNum]);
+
+    // On valide les changements dans la base de données
+    await client.query('COMMIT');
+    // ---------------------------------
 
     // 🔥 5. JOIN pour retour complet
     const selectJoinedQuery = `
@@ -111,6 +119,7 @@ const createAppointment = async (req, res) => {
           'code_postal', r.code_postal,
           'complement_adresse', r.complement_adresse,
           'piece_jointe', r.piece_jointe,
+          'status', r.status, -- Ajouté pour voir le nouveau statut de la requête
           'created_at', r.created_at
         ) AS request,
 
@@ -127,16 +136,16 @@ const createAppointment = async (req, res) => {
       WHERE a.id = $1
     `;
 
-    const appointmentResult = await pool.query(selectJoinedQuery, [
-      newAppointmentId
-    ]);
+    const appointmentResult = await client.query(selectJoinedQuery, [newAppointmentId]);
 
     return res.status(201).json({
-      message: "Rendez-vous créé avec succès",
+      message: "Rendez-vous créé et demande mise à jour avec succès",
       appointment: appointmentResult.rows[0]
     });
 
   } catch (error) {
+    // En cas d'erreur, on annule tout ce qui a été fait dans la transaction
+    await client.query('ROLLBACK');
     console.error("🔥 POSTGRES ERROR:", error);
 
     // FK admin error
@@ -150,23 +159,13 @@ const createAppointment = async (req, res) => {
       message: "Erreur lors de la création du rendez-vous",
       error: error.message
     });
+  } finally {
+    // Très important : on libère toujours le client pour le remettre dans le pool
+    client.release();
   }
 };
-/////////////////////////
-//// ** UPDATE ** ////
-////////////////////////
 
 
-
-/////////////////////////
-//// ** DELETE ** ////
-////////////////////////
-
-
-
-/////////////////////////
-//// ** GET BY DATE ** ////
-////////////////////////
 
 const getTakenHoursByDate = async (req, res) => {
   try {

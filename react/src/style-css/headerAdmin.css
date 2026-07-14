@@ -1,90 +1,279 @@
 
+/* --- BLOCK: ADMIN HEADER --- */
+.admin-header {
+  width: 100%;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  font-family: 'Montserrat', sans-serif;
+}
 
-.nav {
+.admin-header__nav {
+   max-width: 2000px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  max-width: var(--container);
+}
+
+/* Logo */
+.admin-header__logo-link {
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--dark);
 }
 
-/* pousse tout à droite */
-.nav-right {
-  margin-left: auto;
+.admin-header__logo-img {
+  height: 70px;
+  width: 45px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.admin-header__logo-text {
+ font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+/* Liens centraux */
+.admin-header__links {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
 }
 
-/* profil button */
-.profile-button {
-  background: #a38a5e;
-  color: white;
-  border: none;
-  font-size: 20px;
-  padding: 15px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
+.admin-header__link {
+  text-decoration: none;
+  color: var(--text-light);
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all var(--transition);
 }
 
-/* dropdown */
-.profile-wrapper {
+.admin-header__link:hover {
+  color: var(--dark);
+  background-color: var(--bg-hover);
+}
+
+/* Zone Droite */
+.admin-header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* --- BLOCK: ADMIN PROFILE --- */
+.admin-profile {
   position: relative;
 }
 
-.profile-dropdown {
-  position: absolute;
-  right: 0;
-  top: 45px;
-  width: 220px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #eee;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  overflow: hidden;
-}
-
-.profile-info {
-  padding: 12px;
-  border-bottom: 1px solid #f1f1f1;
-}
-
-.profile-info strong {
-  display: block;
-}
-
-.profile-info small {
-  color: #6b7280;
-}
-
-.dropdown-item {
+.admin-profile__trigger {
+  background-color: var(--gold-light);
+  color: var(--white);
+  border: none;
+  font-size: 20px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  padding: 15px 20px;
-  cursor: pointer;
-  text-decoration: none;
-  color: #333;
+  gap: 8px;
+  transition: background-color var(--transition), transform 0.1s ease;
 }
 
-/* hover commun */
-.dropdown-item:hover {
-  background: #f3f4f6;
+.admin-profile__trigger:hover {
+  background-color: var(--gold-dark);
 }
 
-/* effet focus / clic clavier */
-.dropdown-item:active {
-  background: #e5e7eb;
+.admin-profile__trigger:active {
+  transform: scale(0.98);
 }
 
-/* version logout */
-.logout {
-  color: #dc2626;
+/* Menu Dropdown */
+.admin-profile__dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px); 
+  width: 240px;
+  background-color: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid #e5e7eb;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: adminDropdownSlide var(--transition);
+}
+
+/* Infos User */
+.admin-profile__info {
+  padding: 16px;
+  background-color: var(--bg-hover);
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-profile__name {
+  color: var(--text);
+  font-size: 16px;
   font-weight: 600;
-  width: 100%;
-  background-color: white;
-  border-color: transparent;
 }
 
-/* hover logout spécifique */
-.logout:hover {
-  color: #b91c1c;
+.admin-profile__email {
+  color: var(--text-light);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+/* Liens/Boutons du Dropdown */
+.admin-profile__item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.admin-profile__item:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Option Déconnexion */
+.admin-profile__item--logout {
+  color: var(--danger-color);
+  border-top: 1px solid #e5e7eb;
+}
+
+.admin-profile__item--logout:hover {
+  background-color: var(--danger-bg-hover);
+  color: var(--danger-color);
+}
+
+/* --- BLOCK: BURGER MENU --- */
+.admin-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.admin-burger__line {
+  width: 100%;
+  height: 2px;
+  background-color: var(--dark);
+  transition: all var(--transition);
+}
+
+/* Animation Burger actif */
+.admin-burger--active .admin-burger__line:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.admin-burger--active .admin-burger__line:nth-child(2) {
+  opacity: 0;
+}
+.admin-burger--active .admin-burger__line:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* --- ANIMATIONS & RESPONSIVE --- */
+/* --- ANIMATIONS --- */
+@keyframes adminDropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- RESPONSIVE WORK --- */
+@media (max-width: 992px) {
+  /* On affiche le bouton burger */
+  .admin-burger {
+    display: flex;
+    z-index: 100; /* Passe au-dessus du menu mobile */
+  }
+
+  /* Le conteneur du menu devient un panneau mobile masqué par défaut */
+  .admin-header__menu {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Complètement caché à droite */
+    width: 280px;  /* Largeur fixe du menu mobile */
+    height: 100vh;
+    background-color: var(--white);
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.1);
+    padding: 100px 24px 24px 24px; /* Grand padding top pour laisser le bouton burger visible */
+    transition: right var(--transition);
+    z-index: 90;
+  }
+
+  /* Quand le menu est ouvert, on le fait glisser à l'écran */
+  .admin-header__menu--open {
+    right: 0;
+  }
+
+  /* Les liens s'empilent verticalement sur mobile */
+  .admin-header__links {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .admin-header__link {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px; /* Texte un peu plus grand pour faciliter le clic au doigt */
+  }
+}
+
+/* Ajustements pour les très petits écrans (téléphones) */
+@media (max-width: 480px) {
+  .admin-header__nav {
+    padding: 0 16px;
+    height: 70px; /* Header un poil plus compact */
+  }
+
+  /* Masque le texte du logo pour ne garder que l'image sur petit écran si besoin, 
+     ou réduit simplement la taille pour éviter que le profil chevauche */
+  .admin-header__logo-text {
+    font-size: 13px;
+  }
+
+  .admin-profile__trigger {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Le dropdown s'adapte à la largeur de l'écran pour pas déborder */
+  .admin-profile__dropdown {
+    width: 200px;
+  }
 }

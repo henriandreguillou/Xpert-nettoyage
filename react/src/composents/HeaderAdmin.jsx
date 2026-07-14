@@ -10,13 +10,11 @@ export default function HeaderAdmin() {
 
   const location = useLocation();
 
-  // fermer menus au changement de page
   useEffect(() => {
     setIsMenuOpen(false);
     setOpenProfile(false);
   }, [location]);
 
-  // ESC pour fermer
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") {
@@ -24,93 +22,75 @@ export default function HeaderAdmin() {
         setOpenProfile(false);
       }
     };
-
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
-  // récupérer admin
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
         const token = localStorage.getItem("token");
-
         const res = await fetch("http://localhost:5000/api/admin/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         const data = await res.json();
         setAdmin(data);
       } catch (err) {
         console.error(err);
       }
     };
-
     fetchAdmin();
   }, []);
 
   return (
-    <header className="header">
-      <nav className="nav">
+    <header className="admin-header">
+      <nav className="admin-header__nav">
 
         {/* LOGO */}
-        <Link to="/admin/calendar" className="logo-container">
-          <img src={logo} alt="XPERTNETTOYAGE" className="logo-image" />
-          <span className="logo-text">
+        <Link to="/admin/calendar" className="admin-header__logo-link">
+          <img src={logo} alt="XPERTNETTOYAGE" className="admin-header__logo-img" />
+          <span className="admin-header__logo-text">
             XPERTNETTOYAGE - ADMIN
           </span>
         </Link>
 
         {/* MENU NAV */}
-        <div className={`nav-navigation-wrapper ${isMenuOpen ? "show-menu" : ""}`}>
-          <div className="nav-links-group">
-
-            <Link className="nav-link" to="/admin/calendar">
-              Planning
-            </Link>
-
-            <Link className="nav-link" to="/admin/appointment" >Créer un rendez-vous</Link>
-
-            <Link className="nav-link" to="/">
-              Retour au site
-            </Link>
-
+        <div className={`admin-header__menu ${isMenuOpen ? "admin-header__menu--open" : ""}`}>
+          <div className="admin-header__links">
+            <Link className="admin-header__link" to="/admin/calendar">Planning</Link>
+            <Link className="admin-header__link" to="/admin/request">Créer un rendez-vous</Link>
+            <Link className="admin-header__link" to="/">Retour au site</Link>
           </div>
         </div>
 
         {/* DROITE (PROFIL) */}
-        <div className="nav-right">
-
+        <div className="admin-header__right">
           {admin && (
-            <div className="profile-wrapper">
-
+            <div className="admin-profile">
               <button
-                className="profile-button"
+                className="admin-profile__trigger"
                 onClick={() => setOpenProfile(!openProfile)}
               >
-                👤 {admin.prenom} {admin.nom}
+                 {admin.prenom} {admin.nom}
               </button>
 
               {openProfile && (
-                <div className="profile-dropdown">
-
-                  <div className="profile-info">
-                    <strong>{admin.prenom} {admin.nom}</strong>
-                    <small>{admin.email}</small>
+                <div className="admin-profile__dropdown">
+                  <div className="admin-profile__info">
+                    <strong className="admin-profile__name">{admin.prenom} {admin.nom}</strong>
+                    <small className="admin-profile__email">{admin.email}</small>
                   </div>
 
                   <Link
                     to="/admin/profile"
-                    className="dropdown-item"
+                    className="admin-profile__item"
                     onClick={() => setOpenProfile(false)}
                   >
                     Mon profil
                   </Link>
 
                   <button
-                    className="dropdown-item logout "
+                    className="admin-profile__item admin-profile__item--logout"
                     onClick={() => {
                       localStorage.removeItem("token");
                       window.location.href = "/login";
@@ -118,23 +98,20 @@ export default function HeaderAdmin() {
                   >
                     Déconnexion
                   </button>
-
                 </div>
               )}
-
             </div>
           )}
 
           {/* BURGER */}
           <button
-            className={`burger-menu ${isMenuOpen ? "active" : ""}`}
+            className={`admin-burger ${isMenuOpen ? "admin-burger--active" : ""}`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <span></span>
-            <span></span>
-            <span></span>
+            <span className="admin-burger__line"></span>
+            <span className="admin-burger__line"></span>
+            <span className="admin-burger__line"></span>
           </button>
-
         </div>
 
       </nav>

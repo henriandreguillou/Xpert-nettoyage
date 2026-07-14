@@ -28,19 +28,17 @@
 /* Ligne d'un service (Bloc) - MODIFIÉ POUR MOBILE */
 .services-item {
   display: flex;
-  flex-direction: column; /* Par défaut sur mobile : l'un sous l'autre */
-  align-items: center;   /* Centre l'image et le texte sur mobile */
-  text-align: center;    /* Centre le texte pour un rendu plus propre sur mobile */
-  gap: 16px;             /* Espace réduit sur mobile */
+  flex-direction: column; 
+  align-items: center;  
+  text-align: center;    
   padding: 20px;
   border-radius: 12px;
   cursor: pointer;
-  background-color: rgba(26, 26, 26, 0.4); /* Léger fond translucide pour détacher du fond */
-  backdrop-filter: blur(4px); /* Effet flou moderne derrière les blocs */
+  background-color: rgba(26, 26, 26, 0.4); 
+  backdrop-filter: blur(4px);
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-/* Effet hover actif uniquement sur PC */
 
 
 /* Conteneur de l'image (Gestion de la taille et de la forme) */
@@ -49,7 +47,7 @@
   height: 80px;
   flex-shrink: 0;
   overflow: hidden;
-  border-radius: 16px; /* Coins très arrondis style "super-ellipse" */
+  border-radius: 16px; 
   background-color: #222;
 }
 
@@ -107,18 +105,18 @@
   }
 
   .services-item {
-    flex-direction: row; /* Aligne l'image à gauche et le texte à droite */
+    flex-direction: row; 
     align-items: center;
-    text-align: left;    /* Aligne le texte à gauche */
-    gap: 30px;           /* Reprend le grand espace initial */
+    text-align: left;  
+    gap: 30px;        
   }
 
   .service-header {
-    justify-content: flex-start; /* Réaligne le titre à gauche */
+    justify-content: flex-start; 
   }
 
   .services-title {
-    white-space: nowrap; /* Coupe le texte proprement sur PC si trop long */
+    white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
   }

@@ -106,24 +106,27 @@ const createRequest = async (req, res) => {
 
 
 const getAllRequests = async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT * FROM request ORDER BY id DESC"
-    );
+    try {
+        // MODIFIE LA REQUÊTE ICI AVEC LE LEFT JOIN
+        const query = `
+          SELECT 
+            r.*, 
+            a.date_appointment, 
+            a.heure_appointment
+          FROM request r
+          LEFT JOIN appointment a ON r.num_rq = a.request_num_rq
+          ORDER BY r.created_at DESC;
+        `;
 
-    return res.status(200).json({
-      message: "Liste des requests",
-      data: result.rows
-    });
+        const result = await pool.query(query);
 
-  } catch (error) {
-    console.error("🔥 ERROR:", error);
-
-    return res.status(500).json({
-      message: "Erreur serveur",
-      error: error.message
-    });
-  }
+        return res.status(200).json({
+          data: result.rows
+        });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Erreur serveur" });
+      }
 };
 
 const getRequestByNum = async (req, res) => {
@@ -156,10 +159,88 @@ const getRequestByNum = async (req, res) => {
   }
 };
 
+const deleteRequest = async (req, res) => {
+  try {
+    const { num_rq } = req.params;
+
+    if (!num_rq) {
+      return res.status(400).json({
+        message: "Le numéro de demande est requis"
+      });
+    }
+
+    // Vérifie si la demande existe
+    const check = await pool.query(
+      "SELECT * FROM request WHERE num_rq = $1",
+      [num_rq]
+    );
+
+    if (check.rows.length === 0) {
+      return res.status(404).json({
+        message: "Demande introuvable"
+      });
+    }
+
+    // Suppression
+    await pool.query(
+      "DELETE FROM request WHERE num_rq = $1",
+      [num_rq]
+    );
+
+    return res.status(200).json({
+      message: "Demande supprimée avec succès"
+    });
+
+  } catch (error) {
+    console.error("🔥 ERROR:", error);
+
+    return res.status(500).json({
+      message: "Erreur serveur",
+      error: error.message
+    });
+  }
+};
+
+const getRequestByStatus = async (req, res) => {
+  try {
+    // decodeURIComponent permet de transformer "en%20attente" en "en attente"
+    const status = decodeURIComponent(req.params.status).trim();
+
+    if (!status) {
+      return res.status(400).json({ message: "Le paramètre statut est obligatoire." });
+    }
+
+    // On utilise ILIKE à la place de = pour ignorer les majuscules/minuscules
+    const query = `
+      SELECT 
+        r.*, 
+        a.date_appointment, 
+        a.heure_appointment
+      FROM request r
+      LEFT JOIN appointment a ON r.num_rq = a.request_num_rq
+      WHERE r.status = $1
+      ORDER BY r.created_at DESC;
+    `;
+
+    const result = await pool.query(query, [status]);
+
+    return res.status(200).json({
+      message: `Liste des demandes avec le statut '${status}'`,
+      data: result.rows // Vérifie bien que c'est result.rows et pas autre chose
+    });
+
+  } catch (error) {
+    console.error("🔥 ERROR:", error);
+    return res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
+};
+
 
 
 module.exports = {
   createRequest,
   getAllRequests,
-  getRequestByNum
+  getRequestByNum,
+  deleteRequest,
+  getRequestByStatus
 };  

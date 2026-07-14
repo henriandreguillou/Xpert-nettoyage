@@ -1,0 +1,112 @@
+/* ./style-css/profileAdmin.css */
+
+.profile-container {
+  max-width: var(--container);
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: sans-serif;
+  color: var(--text);
+}
+
+.profile-container h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  position: relative;
+  color: var(--dark);
+}
+
+/* Petite ligne dorée sous le titre pour le style */
+.profile-container h1::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 3px;
+  background: var(--gold-light);
+  margin-top: 8px;
+  border-radius: 2px;
+}
+
+.profile-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px;
+  border: 1px solid rgba(200, 169, 106, 0.15); /* Légère touche dorée */
+}
+
+.profile-card p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between; /* Aligne les labels à gauche et les infos à droite */
+}
+
+.profile-card p:last-of-type {
+  border-bottom: none;
+  margin-bottom: 32px;
+}
+
+.profile-card strong {
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+/* Section Boutons */
+.profile-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap; /* S'adapte sur mobile */
+}
+
+.profile-actions button {
+  background: var(--dark);
+  color: var(--white);
+  border: 1px solid var(--dark);
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: calc(var(--radius) / 2); /* Arrondi proportionnel */
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+/* Effet au survol du premier bouton */
+.profile-actions button:hover {
+  background: var(--gold-light);
+  border-color: var(--gold-light);
+  transform: translateY(-2px);
+}
+
+/* Style distinct pour le deuxième bouton (Modifier le mot de passe) */
+.profile-actions button:last-child {
+  background: transparent;
+  color: var(--gold-dark);
+  border-color: var(--gold-dark);
+}
+
+.profile-actions button:last-child:hover {
+  background: var(--gold-dark);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+/* Responsive / Mobile */
+@media (max-width: 600px) {
+  .profile-card p {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .profile-actions {
+    flex-direction: column;
+  }
+  
+  .profile-actions button {
+    width: 100%;
+    text-align: center;
+  }
+}

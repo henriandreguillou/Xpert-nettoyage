@@ -251,7 +251,7 @@
 .light-subtext {
   font-family: 'Montserrat', sans-serif;
   font-size: 0.8rem;
-  color: #444444;
+  color:var(--elegant-gold);
   font-weight: 400;
 }
 

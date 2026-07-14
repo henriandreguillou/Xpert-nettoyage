@@ -1,12 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const verifyAdmin = require("../middleware/auth.middleware");
 
 const multer = require("multer");
 const path = require("path");
 
 const { createRequest,
         getAllRequests,
-        getRequestByNum
+        getRequestByNum,
+        deleteRequest,
+        getRequestByStatus
  } = require("../controllers/requestController");
 
 // =========================
@@ -29,7 +32,9 @@ const upload = multer({ storage });
 // =========================
 
 router.post("/", upload.single("piece_jointe"), createRequest);
-router.get("/", getAllRequests);
-router.get("/:num_rq", getRequestByNum);
+router.get("/page", getAllRequests);
+router.get("/:num_rq", verifyAdmin, getRequestByNum);
+router.delete("/:num_rq", deleteRequest);
+router.get("/status/:status", getRequestByStatus)
 
 module.exports = router;

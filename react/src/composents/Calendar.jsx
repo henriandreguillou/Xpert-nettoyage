@@ -37,37 +37,52 @@ export default function Calendar() {
         }
       );
 
-      const formatted = res.data.map((rdv) => ({
-        id: rdv.id,
+      const formatted = res.data.map((rdv) => {
+        let date;
 
-        title:
-          rdv.type_client === "entreprise"
-            ? rdv.societe
-            : `${rdv.nom} ${rdv.prenom}`,
+        if (typeof rdv.date_rdv === "string") {
+          if (rdv.date_rdv.includes("T") || rdv.date_rdv.includes("Z")) {
+            const d = new Date(rdv.date_rdv);
+            date = d.toLocaleDateString("fr-CA"); 
+          } else {
+            date = rdv.date_rdv.substring(0, 10);
+          }
+        } else {
+          const d = new Date(rdv.date_rdv);
+          date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        }
 
-        start: `${rdv.date_rdv.slice(0, 10)}T${rdv.heure_rdv}`,
+        const heure = rdv.heure_rdv || "00:00:00";
 
-        extendedProps: {
-          nom: rdv.nom,
-          prenom: rdv.prenom,
-          heure: rdv.heure_rdv.slice(0, 5),
-          email: rdv.email,
-          phone: rdv.phone,
-          adresse: rdv.adresse,
-          complement_adresse: rdv.complement_adresse,
-          code_postal: rdv.code_postal,
-          ville: rdv.ville,
-          type_client: rdv.type_client,
-          societe: rdv.societe,
-          status: rdv.status,
-        },
-      }));
+        return {
+          id: String(rdv.id),
+          title:
+            rdv.type_client === "entreprise"
+              ? rdv.societe || "Entreprise"
+              : `${rdv.nom || ""} ${rdv.prenom || ""}`,
+          start: `${date}T${heure}`,
+          extendedProps: {
+            nom: rdv.nom || "",
+            prenom: rdv.prenom || "",
+            heure: heure.substring(0, 5),
+            email: rdv.email || "",
+            phone: rdv.phone || "",
+            adresse: rdv.adresse || "",
+            complement_adresse: rdv.complement_adresse || "",
+            code_postal: rdv.code_postal || "",
+            ville: rdv.ville || "",
+            type_client: rdv.type_client,
+            societe: rdv.societe || "",
+            status: rdv.status || "",
+          },
+        };
+      });
 
       setEvents(formatted);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("Erreur calendrier :", error);
 
-      if (err.response?.status === 401) {
+      if (error.response?.status === 401) {
         localStorage.removeItem("token");
         navigate("/login");
       }
@@ -76,19 +91,17 @@ export default function Calendar() {
     }
   };
 
-  if (loading) return <h2>Chargement...</h2>;
-
-  const isEntreprise = selectedRdv?.type_client === "entreprise";
+  // Petit état d'attente discret et propre
+  if (loading) {
+    return <div style={{ textAlign: 'center', padding: '50px', color: '#8e764d', fontFamily: 'sans-serif' }}>Chargement du calendrier...</div>;
+  }
 
   return (
     <div className="calendar-container">
       <FullCalendar
-        plugins={[
-          dayGridPlugin,
-          timeGridPlugin,
-          interactionPlugin,
-        ]}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         locale={frLocale}
+        timeZone="Europe/Paris"
         initialView="dayGridMonth"
         height="auto"
         headerToolbar={{
@@ -97,79 +110,72 @@ export default function Calendar() {
           right: "dayGridMonth,timeGridWeek,timeGridDay",
         }}
         events={events}
-        editable={false}
-        selectable={true}
+        eventTimeFormat={{
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }}
+        // Injection de classes personnalisées pour le rendu de l'événement dans le calendrier
+        eventContent={(eventInfo) => (
+          <div className="custom-event">
+            <span className="event-time">{eventInfo.timeText}</span>
+            <span className="event-title">{eventInfo.event.title}</span>
+          </div>
+        )}
         eventClick={(info) => {
-          setSelectedRdv(info.event.extendedProps);
+          setSelectedRdv({
+            id: info.event.id,
+            ...info.event.extendedProps,
+          });
         }}
       />
 
       {selectedRdv && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSelectedRdv(null)}
-        >
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2>Détails du rendez-vous</h2>
+        <div className="modal-overlay" onClick={() => setSelectedRdv(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Détails du rendez-vous</h3>
 
-            {isEntreprise ? (
+            <div className="modal-body">
+              {selectedRdv.type_client === "entreprise" ? (
+                <p>
+                  <b>Société :</b>{selectedRdv.societe}
+                </p>
+              ) : (
+                <>
+                  <p>
+                    <b>Nom :</b>{selectedRdv.nom}
+                  </p>
+                  <p>
+                    <b>Prénom :</b>{selectedRdv.prenom}
+                  </p>
+                </>
+              )}
+
               <p>
-                <strong>Société :</strong>{" "}
-                {selectedRdv.societe}
+                <b>Heure :</b>{selectedRdv.heure}
               </p>
-            ) : (
-              <>
+              
+              {selectedRdv.email && (
                 <p>
-                  <strong>Nom :</strong>{" "}
-                  {selectedRdv.nom}
+                  <b>Email :</b>{selectedRdv.email}
                 </p>
-
+              )}
+              
+              {selectedRdv.phone && (
                 <p>
-                  <strong>Prénom :</strong>{" "}
-                  {selectedRdv.prenom}
+                  <b>Téléphone :</b>{selectedRdv.phone}
                 </p>
-              </>
-            )}
+              )}
 
-            <p>
-              <strong>Heure :</strong>{" "}
-              {selectedRdv.heure}
-            </p>
+              {selectedRdv.adresse && (
+                <p>
+                  <b>Adresse :</b>
+                  {`${selectedRdv.adresse} ${selectedRdv.complement_adresse ? selectedRdv.complement_adresse : ''}, ${selectedRdv.code_postal} ${selectedRdv.ville}`}
+                </p>
+              )}
+            </div>
 
-            <p>
-              <strong>Email :</strong>{" "}
-              {selectedRdv.email}
-            </p>
-
-            <p>
-              <strong>Téléphone :</strong>{" "}
-              {selectedRdv.phone}
-            </p>
-
-            <p>
-              <strong>Adresse :</strong>{" "}
-              {selectedRdv.adresse}
-            </p>
-
-            <p>
-              <strong>Complément :</strong>{" "}
-              {selectedRdv.complement_adresse || "-"}
-            </p>
-
-            <p>
-              <strong>Code postal :</strong>{" "}
-              {selectedRdv.code_postal}
-            </p>
-
-            <p>
-              <strong>Ville :</strong>{" "}
-              {selectedRdv.ville}
-            </p>
-
-            <button onClick={() => setSelectedRdv(null)}>
+            <button className="modal-close-btn" onClick={() => setSelectedRdv(null)}>
               Fermer
             </button>
           </div>

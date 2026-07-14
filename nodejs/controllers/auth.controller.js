@@ -150,17 +150,47 @@ exports.getAdminProfile = async (req, res) => {
 
 exports.getRendezvous = async (req, res) => {
   try {
+
     const result = await pool.query(`
-      SELECT * FROM rendezvous
+      SELECT
+        id,
+        nom,
+        prenom,
+        email,
+        phone,
+        adresse,
+        complement_adresse,
+        code_postal,
+        ville,
+        type_client,
+        societe,
+        status,
+
+        date_rdv::text AS date_rdv,
+
+        heure_rdv::text AS heure_rdv
+
+      FROM rendezvous
+
       ORDER BY date_rdv, heure_rdv
     `);
 
+
+    console.log(result.rows[0]);
+
+
     return res.status(200).json(result.rows);
+
+
   } catch (error) {
+
+    console.error(error);
+
     return res.status(500).json({
       message: "Erreur récupération rendez-vous",
       error: error.message
     });
+
   }
 };
 

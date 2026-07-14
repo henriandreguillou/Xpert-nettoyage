@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import "../style-css/profileAdmin.css"
 export default function AdminProfile() {
   const [admin, setAdmin] = useState(null);
 
