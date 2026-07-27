@@ -17,7 +17,7 @@
 .nav {
   max-width: 2000px;
   margin: 0 auto;
-  padding: 5px 24px;
+  padding: 10px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -29,60 +29,32 @@
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
   color: #1a1a1a;
+  z-index: 1001; /* Reste au-dessus */
 }
 
 .logo-image {
-  width: 70px;
-  height: auto;
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
   border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.logo-container:hover .logo-image {
+  transform: scale(1.03);
 }
 
 .logo-text {
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: .08em;
+  white-space: nowrap;
 }
 
-/* ---------- BURGER ---------- */
-
-.burger-menu {
-  display: none;
-  flex-direction: column;
-  justify-content: space-between;
-
-  width: 24px;
-  height: 18px;
-
-  background: transparent;
-  border: none;
-  cursor: pointer;
-
-  z-index: 1100;
-}
-
-.burger-menu span {
-  width: 100%;
-  height: 2px;
-  background: #1a1a1a;
-  transition: .3s;
-}
-
-.burger-menu.active span:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
-}
-
-.burger-menu.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.burger-menu.active span:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
-}
-
-/* ---------- NAVIGATION ---------- */
+/* ---------- NAVIGATION DESKTOP ---------- */
 
 .nav-navigation-wrapper {
   display: flex;
@@ -94,54 +66,123 @@
 .nav-links-group {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
 }
 
 .nav-link {
+  position: relative;
   text-decoration: none;
   color: #4a4a4a;
   font-size: .9rem;
   font-weight: 500;
-  transition: .25s;
+  transition: color .25s ease;
+  padding: 5px 0;
+}
+
+/* Animation moderne au survol */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: #c8a96a;
+  transition: width 0.3s ease;
 }
 
 .nav-link:hover {
-  color: #a38a5e;
+  color: #c8a96a;
+}
+
+.nav-link:hover::after {
+  width: 100%;
 }
 
 /* ---------- BOUTON RDV ---------- */
 
 .dropdown-button {
   margin-left: auto;
-
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-
   text-decoration: none;
-
   background: #c8a96a;
-  color: white;
-
-  padding: 16px 22px;
-
+  color: #ffffff;
+  padding: 12px 24px;
   border-radius: 4px;
-
-  font-size: .9rem;
+  font-size: .85rem;
   font-weight: 600;
   text-transform: uppercase;
-
-  transition: .25s;
+  letter-spacing: 0.05em;
+  transition: background-color .25s ease, transform .25s ease, box-shadow .25s ease;
 }
 
 .dropdown-button:hover {
   background: #8e764d;
-  color: white;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(200, 169, 106, 0.3);
 }
 
-/* ---------- RESPONSIVE ---------- */
+/* ---------- BURGER MENU ---------- */
 
-@media (max-width:900px) {
+.burger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 26px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1100;
+}
+
+.burger-menu span {
+  width: 100%;
+  height: 2px;
+  background: #1a1a1a;
+  border-radius: 2px;
+  transition: transform .3s ease, opacity .3s ease, background-color .3s ease;
+}
+
+.burger-menu.active span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.burger-menu.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.burger-menu.active span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Overlay sombre pour le mobile */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 1040;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.nav-overlay.show {
+  display: block;
+  opacity: 1;
+}
+
+/* ---------- RESPONSIVE TABLETTE & MOBILE ---------- */
+
+@media (max-width: 900px) {
 
   .burger-menu {
     display: flex;
@@ -149,26 +190,23 @@
 
   .nav-navigation-wrapper {
     position: fixed;
-
     top: 0;
     right: -100%;
-
-    width: 280px;
+    width: 300px;
+    max-width: 80vw;
     height: 100vh;
-
-    background: white;
-
-    box-shadow: -5px 0 20px rgba(0,0,0,.12);
-
+    height: 100dvh; /* Support dynamique mobile pour Safari/Chrome iOS */
+    background: #ffffff;
+    box-shadow: -5px 0 25px rgba(0,0,0,.15);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-
-    gap: 40px;
-
-    padding: 90px 30px;
-
-    transition: right .35s ease;
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 100px 28px 40px 28px;
+    margin-left: 0;
+    z-index: 1050;
+    overflow-y: auto; /* Permet le scroll interne si le menu est long */
+    transition: right .35s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .nav-navigation-wrapper.show-menu {
@@ -177,27 +215,45 @@
 
   .nav-links-group {
     width: 100%;
-
-    display: flex;
     flex-direction: column;
     align-items: flex-start;
-
-    gap: 20px;
+    gap: 0;
   }
 
   .nav-link {
     width: 100%;
-    font-size: 1.05rem;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ececec;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .nav-link::after {
+    display: none; /* Désactive la barre desktop en mobile */
   }
 
   .dropdown-button {
     width: 100%;
     margin-left: 0;
+    margin-top: 25px;
+    padding: 14px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+}
 
-    padding: 15px;
+/* Adaptations pour très petits écrans (< 480px) */
+@media (max-width: 480px) {
+  .nav {
+    padding: 8px 16px;
+  }
 
-    justify-content: center;
+  .logo-image {
+    width: 48px;
+    height: 48px;
+  }
+
+  .logo-text {
+    font-size: 0.85rem;
   }
 }
