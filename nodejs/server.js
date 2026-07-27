@@ -19,9 +19,16 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // ======================
-// MIDDLEWARE
+// MIDDLEWARE (CORS mis à jour)
 // ======================
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // Ou votre domaine React ex: "http://localhost:3000"
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 
 // ======================

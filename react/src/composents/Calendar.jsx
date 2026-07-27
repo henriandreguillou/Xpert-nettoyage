@@ -43,7 +43,7 @@ export default function Calendar() {
         if (typeof rdv.date_rdv === "string") {
           if (rdv.date_rdv.includes("T") || rdv.date_rdv.includes("Z")) {
             const d = new Date(rdv.date_rdv);
-            date = d.toLocaleDateString("fr-CA"); 
+            date = d.toLocaleDateString("fr-CA");
           } else {
             date = rdv.date_rdv.substring(0, 10);
           }
@@ -91,9 +91,41 @@ export default function Calendar() {
     }
   };
 
-  // Petit état d'attente discret et propre
+  // Redirection vers le formulaire d'édition
+  const handleEdit = (id) => {
+    setSelectedRdv(null); // Ferme le modal
+    navigate(`/admin/appointment/edit/${id}`); // 👈 Le chemin doit être exact !
+  };
+  // Supprimer / Annuler le rendez-vous
+  const deleteAppointment = async (id) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir annuler ce rendez-vous ?")) {
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    try {
+      await axios.delete(`http://localhost:5000/appointment/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Met à jour la vue sans recharger toute la page
+      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
+      setSelectedRdv(null);
+    } catch (error) {
+      console.error("Erreur lors de la suppression du rendez-vous :", error);
+      alert("Erreur lors de l'annulation du rendez-vous.");
+    }
+  };
+
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '50px', color: '#8e764d', fontFamily: 'sans-serif' }}>Chargement du calendrier...</div>;
+    return (
+      <div style={{ textAlign: "center", padding: "50px", color: "#8e764d", fontFamily: "sans-serif" }}>
+        Chargement du calendrier...
+      </div>
+    );
   }
 
   return (
@@ -115,7 +147,6 @@ export default function Calendar() {
           minute: "2-digit",
           hour12: false,
         }}
-        // Injection de classes personnalisées pour le rendu de l'événement dans le calendrier
         eventContent={(eventInfo) => (
           <div className="custom-event">
             <span className="event-time">{eventInfo.timeText}</span>
@@ -138,46 +169,56 @@ export default function Calendar() {
             <div className="modal-body">
               {selectedRdv.type_client === "entreprise" ? (
                 <p>
-                  <b>Société :</b>{selectedRdv.societe}
+                  <b>Société : </b>{selectedRdv.societe}
                 </p>
               ) : (
                 <>
                   <p>
-                    <b>Nom :</b>{selectedRdv.nom}
+                    <b>Nom : </b>{selectedRdv.nom}
                   </p>
                   <p>
-                    <b>Prénom :</b>{selectedRdv.prenom}
+                    <b>Prénom : </b>{selectedRdv.prenom}
                   </p>
                 </>
               )}
 
               <p>
-                <b>Heure :</b>{selectedRdv.heure}
+                <b>Heure : </b>{selectedRdv.heure}
               </p>
-              
+
               {selectedRdv.email && (
                 <p>
-                  <b>Email :</b>{selectedRdv.email}
+                  <b>Email : </b>{selectedRdv.email}
                 </p>
               )}
-              
+
               {selectedRdv.phone && (
                 <p>
-                  <b>Téléphone :</b>{selectedRdv.phone}
+                  <b>Téléphone : </b>{selectedRdv.phone}
                 </p>
               )}
 
               {selectedRdv.adresse && (
                 <p>
-                  <b>Adresse :</b>
-                  {`${selectedRdv.adresse} ${selectedRdv.complement_adresse ? selectedRdv.complement_adresse : ''}, ${selectedRdv.code_postal} ${selectedRdv.ville}`}
+                  <b>Adresse : </b>
+                  {`${selectedRdv.adresse} ${selectedRdv.complement_adresse ? selectedRdv.complement_adresse : ""}, ${selectedRdv.code_postal} ${selectedRdv.ville}`}
                 </p>
               )}
             </div>
 
-            <button className="modal-close-btn" onClick={() => setSelectedRdv(null)}>
-              Fermer
-            </button>
+            <div className="modal-actions" style={{ display: "flex", gap: "10px", marginTop: "15px", justifyContent: "flex-end" }}>
+              <button className="btn-edit" onClick={() => handleEdit(selectedRdv.id)}>
+                Modifier
+              </button>
+
+              <button className="btn-cancel" onClick={() => deleteAppointment(selectedRdv.id)}>
+                Annuler RDV
+              </button>
+
+              <button className="modal-close-btn" onClick={() => setSelectedRdv(null)}>
+                Fermer
+              </button>
+            </div>
           </div>
         </div>
       )}

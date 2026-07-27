@@ -1,7 +1,7 @@
 const pool = require('../config/db');
 
 
-const createAppointment = async (req, res) => {
+exports.createAppointment = async (req, res) => {
   // On récupère un client du pool pour gérer la transaction de manière sécurisée
   const client = await pool.connect();
 
@@ -166,8 +166,7 @@ const createAppointment = async (req, res) => {
 };
 
 
-
-const getTakenHoursByDate = async (req, res) => {
+exports.getTakenHoursByDate = async (req, res) => {
   try {
     const { date } = req.params;
 
@@ -204,7 +203,7 @@ const getTakenHoursByDate = async (req, res) => {
   }
 };
 
-const getAppointmentsForCalendar = async (req, res) => {
+exports.getAppointmentsForCalendar = async (req, res) => {
   try {
     const query = `
       SELECT
@@ -246,13 +245,210 @@ const getAppointmentsForCalendar = async (req, res) => {
   }
 };
 
+exports.updateAppointment = async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
 
-module.exports = {
-  createAppointment,
-  getTakenHoursByDate,
-  getAppointmentsForCalendar
+  try {
+    const { request_num_rq, date_rdv, heure_rdv, admin_id, status } = req.body;
+
+    // 🔥 1. Vérifier si le rendez-vous existe
+    const checkApptQuery = `SELECT * FROM appointment WHERE id = $1`;
+    const checkApptResult = await client.query(checkApptQuery, [id]);
+
+    if (checkApptResult.rows.length === 0) {
+      client.release();
+      return res.status(404).json({
+        message: `Le rendez-vous avec l'ID ${id} n'existe pas.`
+      });
+    }
+
+    const oldAppointment = checkApptResult.rows[0];
+    const newRequestNum = request_num_rq ? request_num_rq.trim() : oldAppointment.request_num_rq;
+    const newDate = date_rdv || oldAppointment.date_appointment;
+    const newHeure = heure_rdv || oldAppointment.heure_appointment;
+    const newAdminId = admin_id || oldAppointment.admin_id;
+    const newStatus = status || oldAppointment.status;
+
+    // 🔥 2. Si la demande change, vérifier qu'elle existe
+    if (request_num_rq) {
+      const checkRequestQuery = `SELECT num_rq FROM request WHERE num_rq = $1`;
+      const checkRequestResult = await client.query(checkRequestQuery, [newRequestNum]);
+      if (checkRequestResult.rows.length === 0) {
+        client.release();
+        return res.status(404).json({
+          message: `La demande '${newRequestNum}' n'existe pas.`
+        });
+      }
+    }
+
+    // 🔥 3. Vérifier la disponibilité du créneau (si la date ou l'heure change)
+    if (newDate !== oldAppointment.date_appointment || newHeure !== oldAppointment.heure_appointment) {
+      const checkSlotQuery = `
+        SELECT id 
+        FROM appointment
+        WHERE date_appointment = $1 
+        AND heure_appointment = $2
+        AND id != $3
+      `;
+      const checkSlotResult = await client.query(checkSlotQuery, [newDate, newHeure, id]);
+
+      if (checkSlotResult.rows.length > 0) {
+        client.release();
+        return res.status(400).json({
+          message: "Ce créneau est déjà réservé par un autre rendez-vous."
+        });
+      }
+    }
+
+    // --- DÉBUT DE LA TRANSACTION ---
+    await client.query('BEGIN');
+
+    // 🔥 4. UPDATE du rendez-vous
+    const updateQuery = `
+      UPDATE appointment 
+      SET request_num_rq = $1,
+          admin_id = $2,
+          date_appointment = $3,
+          heure_appointment = $4,
+          status = $5
+      WHERE id = $6
+    `;
+
+    await client.query(updateQuery, [
+      newRequestNum,
+      newAdminId,
+      newDate,
+      newHeure,
+      newStatus,
+      id
+    ]);
+
+    // 🔥 5. Si l'ancienne demande était différente et qu'elle n'a plus d'autres RDV, 
+    // on peut optionnellement remettre son statut à "en attente" (selon votre logique métier)
+    if (oldAppointment.request_num_rq !== newRequestNum) {
+      const checkOldReqRemaining = `SELECT id FROM appointment WHERE request_num_rq = $1`;
+      const remaining = await client.query(checkOldReqRemaining, [oldAppointment.request_num_rq]);
+      
+      if (remaining.rows.length === 0) {
+        await client.query(`UPDATE request SET status = 'en attente' WHERE num_rq = $1`, [oldAppointment.request_num_rq]);
+      }
+      
+      // Mettre le nouveau à "programmé"
+      await client.query(`UPDATE request SET status = 'programmé' WHERE num_rq = $1`, [newRequestNum]);
+    }
+
+    await client.query('COMMIT');
+    // ---------------------------------
+
+    // 🔥 6. Requête de jointure pour le retour (similaire au create)
+    const selectJoinedQuery = `
+      SELECT 
+        a.id AS appointment_id,
+        a.date_appointment,
+        a.heure_appointment,
+        a.status AS appointment_status,
+        a.created_at AS appointment_created_at,
+
+        json_build_object(
+          'id', r.id,
+          'num_rq', r.num_rq,
+          'nom', r.nom,
+          'prenom', r.prenom,
+          'email', r.email,
+          'phone', r.phone,
+          'adresse', r.adresse,
+          'ville', r.ville,
+          'code_postal', r.code_postal,
+          'complement_adresse', r.complement_adresse,
+          'status', r.status
+        ) AS request,
+
+        json_build_object(
+          'id', adm.id,
+          'nom', adm.nom,
+          'prenom', adm.prenom,
+          'email', adm.email
+        ) AS admin
+
+      FROM appointment a
+      LEFT JOIN request r ON a.request_num_rq = r.num_rq
+      LEFT JOIN admin adm ON a.admin_id = adm.id
+      WHERE a.id = $1
+    `;
+
+    const updatedResult = await client.query(selectJoinedQuery, [id]);
+
+    return res.status(200).json({
+      message: "Rendez-vous mis à jour avec succès",
+      appointment: updatedResult.rows[0]
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error("🔥 POSTGRES ERROR (UPDATE):", error);
+    return res.status(500).json({
+      message: "Erreur lors de la mise à jour du rendez-vous",
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
 };
 
 
+exports.deleteAppointment = async (req, res) => {
+  const { id } = req.params;
+  const client = await pool.connect();
 
+  try {
+    // 🔥 1. Vérifier si le rendez-vous existe et récupérer son request_num_rq
+    const checkApptQuery = `SELECT * FROM appointment WHERE id = $1`;
+    const checkApptResult = await client.query(checkApptQuery, [id]);
 
+    if (checkApptResult.rows.length === 0) {
+      client.release();
+      return res.status(404).json({
+        message: `Le rendez-vous avec l'ID ${id} n'existe pas.`
+      });
+    }
+
+    const appointment = checkApptResult.rows[0];
+    const requestNumRq = appointment.request_num_rq;
+
+    // --- DÉBUT DE LA TRANSACTION ---
+    await client.query('BEGIN');
+
+    // 🔥 2. Supprimer le rendez-vous
+    const deleteQuery = `DELETE FROM appointment WHERE id = $1`;
+    await client.query(deleteQuery, [id]);
+
+    // 🔥 3. Mettre à jour le statut de la request associée (ex: repasser en "en attente")
+    if (requestNumRq) {
+      const updateRequestQuery = `
+        UPDATE request 
+        SET status = 'en attente' 
+        WHERE num_rq = $1
+      `;
+      await client.query(updateRequestQuery, [requestNumRq]);
+    }
+
+    await client.query('COMMIT');
+    // ---------------------------------
+
+    return res.status(200).json({
+      message: "Rendez-vous supprimé avec succès et demande remise en attente",
+      idDeleted: id
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error("🔥 POSTGRES ERROR (DELETE):", error);
+    return res.status(500).json({
+      message: "Erreur lors de la suppression du rendez-vous",
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
+};

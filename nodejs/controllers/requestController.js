@@ -11,7 +11,7 @@ const generateCodeRQ = () => {
   return code;
 };
 
-const createRequest = async (req, res) => {
+exports.createRequest = async (req, res) => {
   try {
     console.log("BODY:", req.body);
     console.log("FILE:", req.file);
@@ -105,7 +105,7 @@ const createRequest = async (req, res) => {
 };
 
 
-const getAllRequests = async (req, res) => {
+exports.getAllRequests = async (req, res) => {
     try {
         // MODIFIE LA REQUÊTE ICI AVEC LE LEFT JOIN
         const query = `
@@ -129,7 +129,7 @@ const getAllRequests = async (req, res) => {
       }
 };
 
-const getRequestByNum = async (req, res) => {
+exports.getRequestByNum = async (req, res) => {
   try {
     const { num_rq } = req.params;
 
@@ -159,7 +159,7 @@ const getRequestByNum = async (req, res) => {
   }
 };
 
-const deleteRequest = async (req, res) => {
+exports.deleteRequest = async (req, res) => {
   try {
     const { num_rq } = req.params;
 
@@ -201,7 +201,7 @@ const deleteRequest = async (req, res) => {
   }
 };
 
-const getRequestByStatus = async (req, res) => {
+exports.getRequestByStatus = async (req, res) => {
   try {
     // decodeURIComponent permet de transformer "en%20attente" en "en attente"
     const status = decodeURIComponent(req.params.status).trim();
@@ -237,10 +237,3 @@ const getRequestByStatus = async (req, res) => {
 
 
 
-module.exports = {
-  createRequest,
-  getAllRequests,
-  getRequestByNum,
-  deleteRequest,
-  getRequestByStatus
-};  

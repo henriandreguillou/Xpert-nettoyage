@@ -74,6 +74,9 @@ export default function Header() {
             <Link className="nav-link" to="/tarifs">
               Tarifs
             </Link>
+            <Link className="nav-link" to="/login">
+              login
+            </Link>
           </div>
 
           {/* BOUTON PRENDRE RENDEZ-VOUS */}

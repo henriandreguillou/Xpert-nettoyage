@@ -14,11 +14,17 @@ function verifyAdmin(req, res, next) {
 
     console.log("DECODED TOKEN:", decoded);
 
-    if (decoded.role !== "admin") {
+    // Vérifie role OR type, ou si isAdmin est true
+    const isAdmin = 
+      decoded.role === "admin" || 
+      decoded.type === "admin" || 
+      decoded.isAdmin === true;
+
+    if (!isAdmin) {
       return res.status(403).json({ message: "Accès refusé (admin uniquement)" });
     }
 
-    req.user = decoded; // ✅ IMPORTANT
+    req.user = decoded; // ✅
     next();
   } catch (err) {
     return res.status(401).json({

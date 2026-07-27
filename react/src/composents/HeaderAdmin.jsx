@@ -58,7 +58,7 @@ export default function HeaderAdmin() {
         <div className={`admin-header__menu ${isMenuOpen ? "admin-header__menu--open" : ""}`}>
           <div className="admin-header__links">
             <Link className="admin-header__link" to="/admin/calendar">Planning</Link>
-            <Link className="admin-header__link" to="/admin/request">Créer un rendez-vous</Link>
+            <Link className="admin-header__link" to="/admin/request">Rendez-vous</Link>
             <Link className="admin-header__link" to="/">Retour au site</Link>
           </div>
         </div>
