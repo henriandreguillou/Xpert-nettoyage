@@ -130,7 +130,7 @@ export default function Footer() {
         <hr className="footer-divider" />
 
         <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} Mon Entreprise - Tous droits réservés</p>
+          <p>© {new Date().getFullYear()} Xpertnettoyage - Tous droits réservés</p>
         </div>
       </footer>
 

@@ -11,25 +11,45 @@ function RequestsPage() {
     fetchRequests();
   }, [selectedStatus]);
 
-  const fetchRequests = async () => {
-    try {
-      setLoading(true);
-      let url = "http://localhost:5000/request/page";
+const fetchRequests = async () => {
+  try {
+    setLoading(true);
+    let url = "http://localhost:5000/request/page";
 
-      if (selectedStatus !== "Tous") {
-        url = `http://localhost:5000/request/status/${selectedStatus}`;
-      }
-
-      const response = await fetch(url);
-      const result = await response.json();
-
-      setRequests(result.data || []);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
+    if (selectedStatus !== "Tous") {
+      url = `http://localhost:5000/request/status/${selectedStatus}`;
     }
-  };
+
+    const response = await fetch(url);
+    const result = await response.json();
+
+    let data = result.data || [];
+
+    // 1. Tri pour "en attente" : du plus ancien au plus récent (selon la date de création)
+    if (selectedStatus === "en attente") {
+      data = [...data].sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+      );
+    }
+
+    // 2. Tri pour "programmé" : du rendez-vous le plus proche au plus loin
+    if (selectedStatus === "programmé") {
+      data = [...data].sort((a, b) => {
+        // Combiner la date et l'heure pour une précision parfaite
+        const dateTimeA = new Date(`${a.date_appointment.split('T')[0]}T${a.heure_appointment || "00:00:00"}`);
+        const dateTimeB = new Date(`${b.date_appointment.split('T')[0]}T${b.heure_appointment || "00:00:00"}`);
+        
+        return dateTimeA - dateTimeB;
+      });
+    }
+
+    setRequests(data);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Utilitaire pour formater la date proprement au format français
   const formatDate = (dateStr) => {

@@ -6,15 +6,18 @@ const {
   createAppointment,
   getTakenHoursByDate,
   getAppointmentsForCalendar,
+  getAppointmentById, // 👈 1. Importer la méthode pour récupérer UN rendez-vous
   updateAppointment,
-  deleteAppointment // 👈 S'assurer qu'il est bien importé ici
+  deleteAppointment
 } = require('../controllers/appointmentController');
 
 router.post('/', verifyAdmin, createAppointment);
 router.get("/heures/:date", verifyAdmin, getTakenHoursByDate);
 router.get("/calendar", getAppointmentsForCalendar);
 
-// 👈 Cette ligne doit être présente
+// 👈 2. Ajouter cette route GET avec le paramètre :id
+router.get('/:id', verifyAdmin, getAppointmentById);
+
 router.put('/:id', verifyAdmin, updateAppointment);
 router.delete('/:id', verifyAdmin, deleteAppointment);
 

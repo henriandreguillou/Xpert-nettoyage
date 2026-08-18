@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 
@@ -7,6 +7,7 @@ import "../style-css/request.css";
 function Request() {
   const [searchParams] = useSearchParams();
   const typeFromUrl = searchParams.get("type");
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     type_client: "particulier",
@@ -17,10 +18,10 @@ function Request() {
     adresse: "",
     ville: "",
     code_postal: "",
-    complement_adresse: ""
+    complement_adresse: "" // facultatif
   });
 
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null); // facultatif
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -45,7 +46,7 @@ function Request() {
   };
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    setFile(e.target.files[0] || null);
   };
 
   const handleSubmit = async (e) => {
@@ -65,8 +66,13 @@ function Request() {
       formData.append("adresse", form.adresse);
       formData.append("ville", form.ville);
       formData.append("code_postal", form.code_postal);
-      formData.append("complement_adresse", form.complement_adresse);
 
+      // Complément d'adresse facultatif
+      if (form.complement_adresse.trim()) {
+        formData.append("complement_adresse", form.complement_adresse.trim());
+      }
+
+      // Fichier facultatif
       if (file) {
         formData.append("piece_jointe", file);
       }
@@ -79,6 +85,7 @@ function Request() {
 
       setMessage("✅ Demande créée avec succès !");
 
+      // Réinitialisation du formulaire
       setForm({
         type_client: "particulier",
         nom: "",
@@ -92,6 +99,9 @@ function Request() {
       });
 
       setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (err) {
       setMessage("❌ " + (err.response?.data?.message || "Erreur serveur"));
     } finally {
@@ -104,45 +114,52 @@ function Request() {
       <h2>Demander une estimation</h2>
 
       <form onSubmit={handleSubmit}>
-        {form.type_client === "entreprise" && (
-          <input
-            name="nom"
-            placeholder="Société"
-            value={form.nom}
-            onChange={handleChange}
-          />
-        )}
-
         {form.type_client === "particulier" && (
           <>
             <input
               name="nom"
-              placeholder="Nom"
+              placeholder="Nom *"
               value={form.nom}
               onChange={handleChange}
+              required
             />
 
             <input
               name="prenom"
-              placeholder="Prénom"
+              placeholder="Prénom *"
               value={form.prenom}
               onChange={handleChange}
+              required
             />
           </>
         )}
 
-        <input name="email" placeholder="Email" value={form.email} onChange={handleChange} />
-        <input name="phone" placeholder="Téléphone" value={form.phone} onChange={handleChange} />
-        <input name="adresse" placeholder="Adresse" value={form.adresse} onChange={handleChange} />
-        <input name="ville" placeholder="Ville" value={form.ville} onChange={handleChange} />
-        <input name="code_postal" placeholder="Code postal" value={form.code_postal} onChange={handleChange} />
-        <input name="complement_adresse" placeholder="Complément adresse" value={form.complement_adresse} onChange={handleChange} />
-
-        {/* 📎 FILE UPLOAD */}
-        <input
-          type="file"
-          onChange={handleFileChange}
+        <input type="email" name="email" placeholder="Email *" value={form.email} onChange={handleChange} required />
+        <input type="tel" name="phone" placeholder="Téléphone *" value={form.phone} onChange={handleChange} required />
+        <input name="adresse" placeholder="Adresse *" value={form.adresse} onChange={handleChange} required />
+        <input name="ville" placeholder="Ville *" value={form.ville} onChange={handleChange} required />
+        <input name="code_postal" placeholder="Code postal *" value={form.code_postal} onChange={handleChange} required />
+        
+        {/* 🏢 COMPLÉMENT D'ADRESSE (FACULTATIF) */}
+        <input 
+          name="complement_adresse" 
+          placeholder="Complément d'adresse (facultatif)" 
+          value={form.complement_adresse} 
+          onChange={handleChange} 
         />
+
+        {/* 📎 FICHIER (FACULTATIF) */}
+        <div>
+          <label htmlFor="file-upload" style={{ display: "block", marginBottom: "4px" }}>
+            Pièce jointe (optionnel) :
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+          />
+        </div>
 
         <button type="submit" disabled={loading}>
           {loading ? "Envoi..." : "Envoyer la demande"}

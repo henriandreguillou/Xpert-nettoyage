@@ -1,8 +1,7 @@
 const pool = require('../config/db');
-
+const { sendAppointmentEmail} = require('../config/mailer')
 
 exports.createAppointment = async (req, res) => {
-  // On récupère un client du pool pour gérer la transaction de manière sécurisée
   const client = await pool.connect();
 
   try {
@@ -12,7 +11,8 @@ exports.createAppointment = async (req, res) => {
       request_num_rq,
       date_rdv,
       heure_rdv,
-      admin_id
+      admin_id,
+      description // 🔥 Récupération du champ description
     } = req.body;
 
     // 🔥 1. Validation champs obligatoires
@@ -61,16 +61,17 @@ exports.createAppointment = async (req, res) => {
     // --- DEBUT DE LA TRANSACTION ---
     await client.query('BEGIN');
 
-    // 🔥 4. INSERT avec status = "programmé" dans appointment
+    // 🔥 4. INSERT dans appointment (avec description)
     const insertAppointmentQuery = `
       INSERT INTO appointment (
         request_num_rq,
         admin_id,
         date_appointment,
         heure_appointment,
-        status
+        status,
+        description
       )
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id
     `;
 
@@ -79,13 +80,14 @@ exports.createAppointment = async (req, res) => {
       admin_id,
       date_rdv,
       heure_rdv,
-      "programmé"
+      "programmé",
+      description || null // Passe null si la description est vide
     ];
 
     const insertResult = await client.query(insertAppointmentQuery, appointmentValues);
     const newAppointmentId = insertResult.rows[0].id;
 
-    // 🔥 NOUVEAU - 4b. Mettre à jour le statut dans la table request en "programmé"
+    // 🔥 4b. Mettre à jour le statut de la demande
     const updateRequestStatusQuery = `
       UPDATE request
       SET status = 'programmé'
@@ -94,16 +96,16 @@ exports.createAppointment = async (req, res) => {
     
     await client.query(updateRequestStatusQuery, [cleanRequestNum]);
 
-    // On valide les changements dans la base de données
     await client.query('COMMIT');
     // ---------------------------------
 
-    // 🔥 5. JOIN pour retour complet
+    // 🔥 5. JOIN pour retour complet (incluant a.description)
     const selectJoinedQuery = `
       SELECT 
         a.id AS appointment_id,
         a.date_appointment,
         a.heure_appointment,
+        a.description,
         a.status AS appointment_status,
         a.created_at AS appointment_created_at,
 
@@ -119,7 +121,7 @@ exports.createAppointment = async (req, res) => {
           'code_postal', r.code_postal,
           'complement_adresse', r.complement_adresse,
           'piece_jointe', r.piece_jointe,
-          'status', r.status, -- Ajouté pour voir le nouveau statut de la requête
+          'status', r.status,
           'created_at', r.created_at
         ) AS request,
 
@@ -137,18 +139,45 @@ exports.createAppointment = async (req, res) => {
     `;
 
     const appointmentResult = await client.query(selectJoinedQuery, [newAppointmentId]);
+    const createdAppointment = appointmentResult.rows[0];
+
+    // 🔥 6. ENVOI DE L'E-MAIL DE CONFIRMATION
+    if (createdAppointment.request && createdAppointment.request.email) {
+      const { email, nom, prenom, num_rq } = createdAppointment.request;
+      
+      const clientName = prenom ? `${prenom} ${nom}`.trim() : (nom || "");
+
+      const formattedDate = new Date(date_rdv).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+
+      try {
+        await sendAppointmentEmail({
+          email: email,
+          clientName: clientName,
+          num_rq: num_rq,
+          date_rdv: formattedDate,
+          heure_rdv: heure_rdv,
+          description: description, // Transmis au service d'e-mail si nécessaire
+          isEdit: false,
+        });
+        console.log(`✉️ E-mail de confirmation envoyé à ${email}`);
+      } catch (emailErr) {
+        console.error("⚠️ Erreur lors de l'envoi de l'e-mail :", emailErr.message);
+      }
+    }
 
     return res.status(201).json({
-      message: "Rendez-vous créé et demande mise à jour avec succès",
-      appointment: appointmentResult.rows[0]
+      message: "Rendez-vous créé et e-mail envoyé avec succès",
+      appointment: createdAppointment
     });
 
   } catch (error) {
-    // En cas d'erreur, on annule tout ce qui a été fait dans la transaction
     await client.query('ROLLBACK');
     console.error("🔥 POSTGRES ERROR:", error);
 
-    // FK admin error
     if (error.code === "23503" && error.constraint === "fk_admin") {
       return res.status(404).json({
         message: "L'administrateur n'existe pas."
@@ -160,11 +189,9 @@ exports.createAppointment = async (req, res) => {
       error: error.message
     });
   } finally {
-    // Très important : on libère toujours le client pour le remettre dans le pool
     client.release();
   }
 };
-
 
 exports.getTakenHoursByDate = async (req, res) => {
   try {
@@ -210,6 +237,7 @@ exports.getAppointmentsForCalendar = async (req, res) => {
         a.id,
         a.date_appointment AS date_rdv,
         a.heure_appointment AS heure_rdv,
+        a.description,
         a.status,
 
         r.num_rq,
@@ -250,39 +278,46 @@ exports.updateAppointment = async (req, res) => {
   const client = await pool.connect();
 
   try {
-    const { request_num_rq, date_rdv, heure_rdv, admin_id, status } = req.body;
+    const { request_num_rq, date_rdv, heure_rdv, admin_id, status, description } = req.body;
 
-    // 🔥 1. Vérifier si le rendez-vous existe
-    const checkApptQuery = `SELECT * FROM appointment WHERE id = $1`;
+    // --- DÉBUT DE LA TRANSACTION ---
+    await client.query('BEGIN');
+
+    // 1. Vérifier si le rendez-vous existe
+    const checkApptQuery = `SELECT * FROM appointment WHERE id = $1 FOR UPDATE`;
     const checkApptResult = await client.query(checkApptQuery, [id]);
 
     if (checkApptResult.rows.length === 0) {
-      client.release();
+      await client.query('ROLLBACK');
       return res.status(404).json({
         message: `Le rendez-vous avec l'ID ${id} n'existe pas.`
       });
     }
 
     const oldAppointment = checkApptResult.rows[0];
+
+    // Déterminer les valeurs finales
     const newRequestNum = request_num_rq ? request_num_rq.trim() : oldAppointment.request_num_rq;
     const newDate = date_rdv || oldAppointment.date_appointment;
     const newHeure = heure_rdv || oldAppointment.heure_appointment;
     const newAdminId = admin_id || oldAppointment.admin_id;
     const newStatus = status || oldAppointment.status;
+    const newDescription = description !== undefined ? description : oldAppointment.description;
 
-    // 🔥 2. Si la demande change, vérifier qu'elle existe
+    // 2. Si la demande change, vérifier son existence
     if (request_num_rq) {
       const checkRequestQuery = `SELECT num_rq FROM request WHERE num_rq = $1`;
       const checkRequestResult = await client.query(checkRequestQuery, [newRequestNum]);
+
       if (checkRequestResult.rows.length === 0) {
-        client.release();
+        await client.query('ROLLBACK');
         return res.status(404).json({
           message: `La demande '${newRequestNum}' n'existe pas.`
         });
       }
     }
 
-    // 🔥 3. Vérifier la disponibilité du créneau (si la date ou l'heure change)
+    // 3. Vérifier la disponibilité du créneau (si date ou heure change)
     if (newDate !== oldAppointment.date_appointment || newHeure !== oldAppointment.heure_appointment) {
       const checkSlotQuery = `
         SELECT id 
@@ -290,29 +325,28 @@ exports.updateAppointment = async (req, res) => {
         WHERE date_appointment = $1 
         AND heure_appointment = $2
         AND id != $3
+        AND status != 'annulé'
       `;
       const checkSlotResult = await client.query(checkSlotQuery, [newDate, newHeure, id]);
 
       if (checkSlotResult.rows.length > 0) {
-        client.release();
+        await client.query('ROLLBACK');
         return res.status(400).json({
           message: "Ce créneau est déjà réservé par un autre rendez-vous."
         });
       }
     }
 
-    // --- DÉBUT DE LA TRANSACTION ---
-    await client.query('BEGIN');
-
-    // 🔥 4. UPDATE du rendez-vous
+    // 4. Mettre à jour le rendez-vous (avec description)
     const updateQuery = `
       UPDATE appointment 
       SET request_num_rq = $1,
           admin_id = $2,
           date_appointment = $3,
           heure_appointment = $4,
-          status = $5
-      WHERE id = $6
+          status = $5,
+          description = $6
+      WHERE id = $7
     `;
 
     await client.query(updateQuery, [
@@ -321,11 +355,11 @@ exports.updateAppointment = async (req, res) => {
       newDate,
       newHeure,
       newStatus,
+      newDescription,
       id
     ]);
 
-    // 🔥 5. Si l'ancienne demande était différente et qu'elle n'a plus d'autres RDV, 
-    // on peut optionnellement remettre son statut à "en attente" (selon votre logique métier)
+    // 5. Gestion des statuts de demande si changement de `request_num_rq`
     if (oldAppointment.request_num_rq !== newRequestNum) {
       const checkOldReqRemaining = `SELECT id FROM appointment WHERE request_num_rq = $1`;
       const remaining = await client.query(checkOldReqRemaining, [oldAppointment.request_num_rq]);
@@ -334,19 +368,16 @@ exports.updateAppointment = async (req, res) => {
         await client.query(`UPDATE request SET status = 'en attente' WHERE num_rq = $1`, [oldAppointment.request_num_rq]);
       }
       
-      // Mettre le nouveau à "programmé"
       await client.query(`UPDATE request SET status = 'programmé' WHERE num_rq = $1`, [newRequestNum]);
     }
 
-    await client.query('COMMIT');
-    // ---------------------------------
-
-    // 🔥 6. Requête de jointure pour le retour (similaire au create)
+    // 6. Requête de jointure pour récupérer les données à jour
     const selectJoinedQuery = `
       SELECT 
         a.id AS appointment_id,
         a.date_appointment,
         a.heure_appointment,
+        a.description,
         a.status AS appointment_status,
         a.created_at AS appointment_created_at,
 
@@ -378,10 +409,41 @@ exports.updateAppointment = async (req, res) => {
     `;
 
     const updatedResult = await client.query(selectJoinedQuery, [id]);
+    const updatedAppointment = updatedResult.rows[0];
+
+    // Valider la transaction PostgreSQL avant les opérations secondaires (envoi de mail)
+    await client.query('COMMIT');
+
+    // 7. Envoi de l'e-mail de confirmation/modification (hors transaction DB)
+    if (updatedAppointment.request && updatedAppointment.request.email) {
+      const { email, nom, prenom, num_rq } = updatedAppointment.request;
+      const clientName = prenom ? `${prenom} ${nom}`.trim() : (nom || "");
+
+      // Découpage propre de la date YYYY-MM-DD sans décalage de fuseau horaire
+      const dateParts = String(newDate).split('T')[0].split('-');
+      const formattedDate = dateParts.length === 3 
+        ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`
+        : newDate;
+
+      try {
+        await sendAppointmentEmail({
+          email,
+          clientName,
+          num_rq,
+          date_rdv: formattedDate,
+          heure_rdv: newHeure,
+          description: newDescription,
+          isEdit: true,
+        });
+        console.log(`✉️ E-mail de mise à jour envoyé à ${email}`);
+      } catch (emailErr) {
+        console.error("⚠️ Erreur lors de l'envoi de l'e-mail :", emailErr.message);
+      }
+    }
 
     return res.status(200).json({
-      message: "Rendez-vous mis à jour avec succès",
-      appointment: updatedResult.rows[0]
+      message: "Rendez-vous mis à jour et e-mail envoyé avec succès",
+      appointment: updatedAppointment
     });
 
   } catch (error) {
@@ -395,7 +457,6 @@ exports.updateAppointment = async (req, res) => {
     client.release();
   }
 };
-
 
 exports.deleteAppointment = async (req, res) => {
   const { id } = req.params;
@@ -450,5 +511,66 @@ exports.deleteAppointment = async (req, res) => {
     });
   } finally {
     client.release();
+  }
+};
+
+exports.getAppointmentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const selectQuery = `
+      SELECT 
+        a.id AS appointment_id,
+        a.date_appointment,
+        a.heure_appointment,
+        a.description,
+        a.status AS appointment_status,
+        a.created_at AS appointment_created_at,
+
+        json_build_object(
+          'id', r.id,
+          'num_rq', r.num_rq,
+          'nom', r.nom,
+          'prenom', r.prenom,
+          'email', r.email,
+          'phone', r.phone,
+          'adresse', r.adresse,
+          'ville', r.ville,
+          'code_postal', r.code_postal,
+          'complement_adresse', r.complement_adresse,
+          'piece_jointe', r.piece_jointe,
+          'status', r.status,
+          'created_at', r.created_at
+        ) AS request,
+
+        json_build_object(
+          'id', adm.id,
+          'nom', adm.nom,
+          'prenom', adm.prenom,
+          'email', adm.email
+        ) AS admin
+
+      FROM appointment a
+      LEFT JOIN request r ON a.request_num_rq = r.num_rq
+      LEFT JOIN admin adm ON a.admin_id = adm.id
+      WHERE a.id = $1
+    `;
+
+    const result = await pool.query(selectQuery, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: `Aucun rendez-vous trouvé avec l'ID ${id}`
+      });
+    }
+
+    return res.status(200).json(result.rows[0]);
+
+  } catch (error) {
+    console.error("🔥 POSTGRES ERROR (GET BY ID):", error);
+    return res.status(500).json({
+      message: "Erreur lors de la récupération du rendez-vous",
+      error: error.message
+    });
   }
 };

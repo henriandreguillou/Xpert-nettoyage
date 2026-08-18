@@ -1,72 +1,90 @@
-/* ===== Page ===== */
+/* ===== Variables & Reset de précaution ===== */
 
+
+/* ===== Page ===== */
 .requests-page {
   width: 95%;
-  max-width: 1500px;
-  margin: 50px auto;
+  max-width: 2200px;
+  margin: 40px auto;
   padding: 30px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
 
-.status-filter-container {
-  margin-bottom: 24px;
-  display: "flex";
-  gap: "10px";
+/* ===== Titre ===== */
+.requests-title {
+  text-align: center;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  margin-bottom: 35px;
+  color: #222;
+  position: relative;
 }
 
-/* Le conteneur des boutons */
+.requests-title::after {
+  content: "";
+  display: block;
+  width: 90px;
+  height: 4px;
+  margin: 12px auto 0;
+  background: var(--gold-light);
+  border-radius: 10px;
+}
+
+/* ===== Filtres de Statut ===== */
 .status-filter-container {
   display: flex;
-  gap: 10px; /* Espace entre les boutons */
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
-/* Style de base des boutons (Inactifs) */
 .status-filter-btn {
   padding: 8px 16px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid #ccc;
   background-color: #fff;
   color: #333;
-  font-weight: normal;
+  font-weight: 500;
   text-transform: capitalize;
   transition: all 0.2s ease;
+  min-height: 40px; /* Meilleure zone de clic tactile */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Effet au survol pour les boutons inactifs */
 .status-filter-btn:hover {
   background-color: #f0f0f0;
   border-color: #bbb;
 }
 
-/* Style du bouton sélectionné (Actif) */
 .status-filter-btn.active {
   background-color: #007bff;
   color: #fff;
   border-color: #007bff;
-  font-weight: bold;
+  font-weight: 600;
 }
 
-/* Optionnel : Désactive l'effet de survol gris sur le bouton déjà actif */
 .status-filter-btn.active:hover {
   background-color: #0069d9;
   border-color: #0062cc;
 }
 
-/* Badges de statut */
+/* ===== Badges de statut ===== */
 .status-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
   font-size: 0.85em;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .status-pending {
   background-color: #fff3cd;
-  color: var(--gold-light);
+  color: #856404;
 }
 
 .status-programmed {
@@ -74,7 +92,7 @@
   color: #385723;
 }
 
-/* Cellule de rendez-vous */
+/* ===== Cellule de rendez-vous ===== */
 .appointment-cell {
   text-align: center;
 }
@@ -101,30 +119,11 @@
   color: #bbb;
 }
 
-/* ===== Titre ===== */
-
-.requests-title {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 35px;
-  color: #222;
-  position: relative;
-}
-
-.requests-title::after {
-  content: "";
-  display: block;
-  width: 90px;
-  height: 4px;
-  margin: 12px auto 0;
-  background: var(--gold-light);
-  border-radius: 10px;
-}
-
-/* ===== Tableau ===== */
-
+/* ===== Tableau (Vue Desktop) ===== */
 .requests-table-wrapper {
+  width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .requests-table {
@@ -156,11 +155,10 @@
 
 .requests-table tbody tr:hover {
   background: rgba(200, 169, 106, 0.12);
-  transition: 0.3s;
+  transition: background 0.3s ease;
 }
 
-/* ===== Lien ===== */
-
+/* ===== Liens & Boutons ===== */
 .requests-link {
   color: var(--gold-dark);
   font-weight: 600;
@@ -172,8 +170,6 @@
   text-decoration: underline;
 }
 
-/* ===== Bouton ===== */
-
 .requests-btn {
   display: inline-block;
   padding: 10px 18px;
@@ -182,7 +178,8 @@
   text-decoration: none;
   border-radius: 6px;
   font-weight: 600;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  text-align: center;
 }
 
 .requests-btn:hover {
@@ -190,22 +187,92 @@
   transform: translateY(-2px);
 }
 
-/* ===== Responsive ===== */
 
-@media (max-width: 1200px) {
-  .requests-table {
-    min-width: 1200px;
+/* ==========================================================================
+   ===== RESPONSIVE DESIGN (Tablettes & Mobiles) =====
+   ========================================================================== */
+
+/* --- Tablettes (1024px et moins) --- */
+@media (max-width: 1024px) {
+  .requests-page {
+    width: 98%;
+    padding: 24px;
+    margin: 20px auto;
   }
 }
 
+/* --- Mobile (768px et moins) --- */
 @media (max-width: 768px) {
   .requests-page {
-    padding: 20px;
-    margin: 20px;
+    padding: 16px;
+    margin: 10px auto;
+    border-radius: 8px;
   }
 
-  .requests-title {
-    font-size: 1.6rem;
+  /* Filtres scrollables horizontalement sur mobile */
+  .status-filter-container {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .status-filter-btn {
+    flex: 0 0 auto; /* Empêche le rétrécissement des boutons */
+    font-size: 0.9rem;
+  }
+
+  /* Transformation du tableau en Cartes sur Mobile */
+  .requests-table, 
+  .requests-table thead, 
+  .requests-table tbody, 
+  .requests-table th, 
+  .requests-table td, 
+  .requests-table tr {
+    display: block;
+  }
+
+  .requests-table thead {
+    display: none; /* Cache les en-têtes du tableau classique */
+  }
+
+  .requests-table tbody tr {
+    margin-bottom: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 10px 0;
+  }
+
+  .requests-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    text-align: right;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .requests-table td:last-child {
+    border-bottom: none;
+  }
+
+  /* Ajoute un libellé automatique devant chaque donnée via data-label */
+  .requests-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #555;
+    text-align: left;
+    padding-right: 15px;
+  }
+
+  .appointment-datetime {
+    align-items: flex-end; /* Aligne la date à droite sur mobile */
+  }
+
+  .requests-btn {
+    width: 100%; /* Bouton pleine largeur sur mobile */
+    box-sizing: border-box;
   }
 }
-

@@ -7,13 +7,16 @@ import { jwtDecode } from "jwt-decode";
 
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import "../style-css/CreateAppointment.css";
 
 registerLocale("fr", fr);
+
+const API_BASE_URL = "http://localhost:5000";
 
 export default function CreateAppointment() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { id: appointmentId } = useParams(); // Récupère l'ID si on est en mode édition (/appointment/edit/:id)
+  const { id: appointmentId } = useParams();
 
   const isEditMode = Boolean(appointmentId);
 
@@ -21,6 +24,7 @@ export default function CreateAppointment() {
     request_num_rq: "",
     date_rdv: "",
     heure_rdv: "",
+    description: "",
     admin_id: "",
   });
 
@@ -46,15 +50,13 @@ export default function CreateAppointment() {
         const decoded = jwtDecode(token);
         loggedAdminId = decoded.id_admin || decoded.admin_id || decoded.id || "";
       } catch (error) {
-        console.error("Erreur lors du décodage du token:", error);
+        console.error("Erreur de décodage du token :", error);
       }
     }
 
     if (isEditMode) {
-      // MODE ÉDITION : Charger le rendez-vous existant
       fetchExistingAppointment(appointmentId, token);
     } else {
-      // MODE CRÉATION : Charger la demande liée
       const request = searchParams.get("request");
       setFormData((prev) => ({
         ...prev,
@@ -66,7 +68,7 @@ export default function CreateAppointment() {
 
   const fetchExistingAppointment = async (id, token) => {
     try {
-      const response = await axios.get(`http://localhost:5000/appointment/${id}`, {
+      const response = await axios.get(`${API_BASE_URL}/appointment/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = response.data;
@@ -83,10 +85,11 @@ export default function CreateAppointment() {
         request_num_rq: data.request_num_rq || "",
         date_rdv: formattedDate,
         heure_rdv: rawHeure.substring(0, 5),
+        description: data.description || data.need_description || "",
         admin_id: data.admin_id || "",
       });
     } catch (error) {
-      console.error("Erreur lors du chargement du RDV:", error);
+      console.error("Erreur chargement RDV :", error);
       setStatus({
         loading: false,
         message: "Impossible de charger les données du rendez-vous",
@@ -96,10 +99,8 @@ export default function CreateAppointment() {
   };
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (date) => {
@@ -120,6 +121,7 @@ export default function CreateAppointment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
+
     if (!token) {
       setStatus({ loading: false, message: "Vous devez être connecté", appointment: null });
       return;
@@ -135,24 +137,18 @@ export default function CreateAppointment() {
       return;
     }
 
-    setStatus((prev) => ({ ...prev, loading: true, message: "", appointment: null }));
+    setStatus({ loading: true, message: "", appointment: null });
 
     try {
-      let response;
+      const endpoint = isEditMode
+        ? `${API_BASE_URL}/appointment/${appointmentId}`
+        : `${API_BASE_URL}/appointment`;
 
-      if (isEditMode) {
-        response = await axios.put(
-          `http://localhost:5000/appointment/${appointmentId}`,
-          formData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else {
-        response = await axios.post(
-          "http://localhost:5000/appointment",
-          formData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
+      const method = isEditMode ? axios.put : axios.post;
+
+      const response = await method(endpoint, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.data.appointment) {
         throw new Error(isEditMode ? "Le rendez-vous n'a pas été modifié" : "Le rendez-vous n'a pas été créé");
@@ -164,15 +160,13 @@ export default function CreateAppointment() {
         appointment: response.data.appointment,
       });
 
-      if (isEditMode) {
-        setTimeout(() => {
-          navigate("/calendar");
-        }, 1200);
-      } else {
+      // En mode création, reinitialisation des champs optionnels
+      if (!isEditMode) {
         setFormData((prev) => ({
           ...prev,
           date_rdv: "",
           heure_rdv: "",
+          description: "",
         }));
       }
     } catch (error) {
@@ -201,13 +195,13 @@ export default function CreateAppointment() {
       alert("Aucune demande sélectionnée");
       return;
     }
+
     if (!window.confirm("Voulez-vous supprimer cette demande ?")) return;
 
     try {
-      await axios.delete(
-        `http://localhost:5000/request/${formData.request_num_rq}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.delete(`${API_BASE_URL}/request/${formData.request_num_rq}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       alert("Demande supprimée avec succès");
       navigate("/admin/requests");
     } catch (error) {
@@ -216,76 +210,105 @@ export default function CreateAppointment() {
   };
 
   return (
-    <div className="container mt-4">
-      <h2>{isEditMode ? "Modifier le rendez-vous" : "Créer un rendez-vous"}</h2>
+    <div className="appointment-page">
+      <div className="appointment-card">
+        <h2 className="appointment-title">
+          {isEditMode ? "Modifier le rendez-vous" : "Créer un rendez-vous"}
+        </h2>
 
-      {status.message && (
-        <div className={`alert ${status.appointment ? "alert-success" : "alert-danger"}`}>
-          {status.message}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <input type="hidden" name="admin_id" value={formData.admin_id} />
-
-        <div className="mb-3">
-          <label className="form-label">Numéro demande</label>
-          <input
-            type="text"
-            className="form-control"
-            value={formData.request_num_rq}
-            readOnly
-          />
-        </div>
-
-        <div className="mb-3 d-flex flex-column">
-          <label className="form-label">Date rendez-vous</label>
-          <DatePicker
-            selected={formData.date_rdv ? new Date(formData.date_rdv) : null}
-            onChange={handleDateChange}
-            dateFormat="dd/MM/yyyy"
-            minDate={new Date()}
-            locale="fr"
-            placeholderText="Sélectionnez une date..."
-            className="form-control"
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Heure rendez-vous</label>
-          <input
-            type="time"
-            className="form-control"
-            name="heure_rdv"
-            value={formData.heure_rdv}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit" className="btn btn-primary" disabled={status.loading}>
-          {status.loading
-            ? isEditMode ? "Modification..." : "Création..."
-            : isEditMode ? "Mettre à jour" : "Créer le rendez-vous"
-          }
-        </button>
-
-        <button type="button" className="btn btn-secondary ms-3" onClick={handleCancel}>
-          {isEditMode ? "Annuler" : "Annuler la demande"}
-        </button>
-      </form>
-
-      {status.appointment && (
-        <div className="card mt-4">
-          <div className="card-body">
-            <h4>{isEditMode ? "Rendez-vous mis à jour" : "Rendez-vous créé"}</h4>
-            <p><strong>Date :</strong> {formatDateFR(status.appointment.date_appointment || status.appointment.date_rdv)}</p>
-            <p><strong>Heure :</strong> {status.appointment.heure_appointment || status.appointment.heure_rdv}</p>
-            <p><strong>Statut :</strong> {status.appointment.appointment_status || "Confirmé"}</p>
+        {status.message && (
+          <div className={`alert ${status.appointment ? "alert-success" : "alert-danger"}`}>
+            {status.message}
           </div>
-        </div>
-      )}
+        )}
+
+        <form onSubmit={handleSubmit} className="appointment-form">
+          <input type="hidden" name="admin_id" value={formData.admin_id} />
+
+          <div className="form-group">
+            <label className="form-label">Numéro demande</label>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.request_num_rq}
+              readOnly
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Date rendez-vous</label>
+            <DatePicker
+              selected={formData.date_rdv ? new Date(formData.date_rdv) : null}
+              onChange={handleDateChange}
+              dateFormat="dd/MM/yyyy"
+              minDate={new Date()}
+              locale="fr"                     
+              calendarStartDay={1}           
+              placeholderText="Sélectionnez une date..."
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Heure rendez-vous</label>
+            <input
+              type="time"
+              className="form-input"
+              name="heure_rdv"
+              value={formData.heure_rdv}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Description du besoin</label>
+            <textarea
+              className="form-input form-textarea"
+              name="description"
+              rows="4"
+              placeholder="Précisez le besoin ou le motif du rendez-vous..."
+              value={formData.description}
+              onChange={handleChange}
+            ></textarea>
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="btn btn-submit" disabled={status.loading}>
+              {status.loading
+                ? isEditMode ? "Modification..." : "Création..."
+                : isEditMode ? "Mettre à jour" : "Créer le rendez-vous"}
+            </button>
+
+            <button type="button" className="btn btn-cancel" onClick={handleCancel}>
+              {isEditMode ? "Annuler" : "Annuler la demande"}
+            </button>
+          </div>
+        </form>
+
+        {status.appointment && (
+          <div className="summary-card">
+            <h4 className="summary-title">
+              {isEditMode ? "Rendez-vous mis à jour" : "Rendez-vous créé"}
+            </h4>
+            <p className="summary-item">
+              <strong>Date :</strong> {formatDateFR(status.appointment.date_appointment || status.appointment.date_rdv)}
+            </p>
+            <p className="summary-item">
+              <strong>Heure :</strong> {status.appointment.heure_appointment || status.appointment.heure_rdv}
+            </p>
+            {status.appointment.description && (
+              <p className="summary-item">
+                <strong>Description :</strong> {status.appointment.description}
+              </p>
+            )}
+            <p className="summary-item">
+              <strong>Statut :</strong> {status.appointment.appointment_status || "Confirmé"}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,16 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const verifyAdmin = require("../middleware/auth.middleware");
-
 const multer = require("multer");
 const path = require("path");
 
-const { createRequest,
-        getAllRequests,
-        getRequestByNum,
-        deleteRequest,
-        getRequestByStatus
- } = require("../controllers/requestController");
+const {
+  createRequest,
+  getAllRequests,
+  getRequestByNum,
+  deleteRequest,
+  getRequestByStatus
+} = require("../controllers/requestController");
 
 // =========================
 // CONFIG MULTER
@@ -28,13 +28,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // =========================
-// ROUTE
+// ROUTES
 // =========================
-
 router.post("/", upload.single("piece_jointe"), createRequest);
 router.get("/page", getAllRequests);
 router.get("/:num_rq", verifyAdmin, getRequestByNum);
 router.delete("/:num_rq", deleteRequest);
-router.get("/status/:status", getRequestByStatus)
+router.get("/status/:status", getRequestByStatus);
 
 module.exports = router;

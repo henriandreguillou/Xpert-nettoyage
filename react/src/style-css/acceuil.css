@@ -12,6 +12,8 @@
   --gold-dark: #8e764d;
 
   --dark: #1a1a1a;
+  --border-gray: #e6e6e4;
+  --light-bg-gray: #fcfcfb;
   --text: #2d2d2d;
   --text-light: #777;
   --white: #fff;
@@ -20,6 +22,7 @@
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 
   --container: 1500px;
+  --container-padding: clamp(16px, 4vw, 40px);
   --transition: 0.3s ease;
   
   --bg-hover: #f9fafb;
@@ -31,6 +34,10 @@
 /* =========================
    GLOBAL
 ========================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 .accueil-container {
   min-height: 100vh;
   width: 100%;
@@ -51,36 +58,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
-  padding: 60px 24px;
-
+  padding: clamp(40px, 8vh, 100px) var(--container-padding);
   background: url("../assets/acceuil.png") center/cover no-repeat;
+  width: 100%;
 }
 
 .hero-content {
+  width: 100%;
   max-width: 700px;
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
-  padding: 40px;
+  -webkit-backdrop-filter: blur(12px);
+  padding: clamp(24px, 5vw, 48px);
   border-radius: var(--radius);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  margin: 5vh auto;
 }
 
 .hero-title {
   font-family: 'Playfair Display', serif;
-  font-size: 2rem;
+  font-size: clamp(1.75rem, 4vw, 3rem);
   font-weight: 400;
-  margin-bottom: 16px;
   line-height: 1.2;
   color: var(--dark);
   margin: 0 0 16px 0;
 }
 
 .hero-description {
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1.5vw, 1.05rem);
   color: var(--text-light);
   margin-bottom: 32px;
-  max-width: 420px;
+  max-width: 460px;
+  line-height: 1.5;
 }
 
 
@@ -93,11 +102,11 @@
   gap: 16px;
 }
 
-
-.btn {
-  padding: 16px 24px;
+.btn-acceuil {
+  padding: 14px 24px;
   border-radius: 4px;
   font-size: 0.85rem;
+  font-weight: 500;
   text-transform: uppercase;
   cursor: pointer;
   transition: var(--transition);
@@ -105,7 +114,9 @@
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+  width: auto;
 }
 
 /* Variante services */
@@ -115,21 +126,20 @@
   border: 2px solid var(--dark);
 }
 
+.btn-services:hover {
+  background: #2d2d2d;
+}
 
 /* Variante rendez-vous */
 .btn-rdv {
   background: var(--gold-light);
   color: var(--white);
-  border: 2px solid var(--dark);
+  border: 2px solid var(--gold-light);
 }
-
-.btn-services:hover {
-  background: #2d2d2d;
-}
-
 
 .btn-rdv:hover {
   background: var(--gold-dark);
+  border-color: var(--gold-dark);
 }
 
 
@@ -138,15 +148,15 @@
 ========================= */
 .services-section {
   background: rgba(255, 255, 255, 0.94);
-  padding: 10px 25px;
+  padding: clamp(30px, 5vw, 60px) var(--container-padding);
 }
 
 .services-grid {
   max-width: var(--container);
   margin: auto;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(20px, 3vw, 40px);
 }
 
 .service-item { 
@@ -154,15 +164,16 @@
   flex-direction: column; 
   align-items: center; 
   text-align: center; 
-  gap: 8px; }
+  gap: 12px;
+}
 
 .service-icon {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   color: var(--gold-light);
 }
 
 .service-title {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -173,6 +184,7 @@
   font-size: 0.85rem;
   color: var(--text-light);
   margin: 0;
+  line-height: 1.4;
 }
 
 
@@ -181,7 +193,7 @@
 ========================= */
 .reassurance-bar {
   background: var(--gold-light);
-  padding: 25px 15px;
+  padding: 20px var(--container-padding);
   z-index: 20;
 }
 
@@ -191,10 +203,13 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 24px;
-  font-size: 0.7rem;
+  align-items: center;
+  gap: clamp(16px, 3vw, 48px);
+  font-size: clamp(0.65rem, 1vw, 0.75rem);
   font-weight: 700;
   text-transform: uppercase;
+  color: var(--white);
+  text-align: center;
 }
 
 
@@ -204,12 +219,14 @@
 .bottom-images {
   background: var(--white);
   display: grid;
-  gap: 40px;
-  padding: 60px 20px;
+  gap: clamp(24px, 4vw, 40px);
+  padding: clamp(40px, 6vw, 80px) var(--container-padding);
 }
 
 .bottom-image {
-  width: min(100%, 1000px);
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
   margin: auto;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -217,33 +234,24 @@
 }
 
 .bottom-image:hover {
-  transform: scale(1.02);
+  transform: translateY(-4px);
 }
 
 
 /* =========================
-   RESPONSIVE
+   RESPONSIVE OVERRIDES
 ========================= */
-@media (min-width: 768px) {
-  .hero-section {
-    padding: 80px;
+@media (max-width: 480px) {
+  .button-group {
+    flex-direction: column;
   }
-
-  .hero-title {
-    font-size: 3rem;
-  }
-
-  .services-grid {
-    grid-template-columns: repeat(2, 1fr);
+  
+  .btn {
+    width: 100%;
   }
 
   .reassurance-content {
-    gap: 48px;
-  }
-}
-
-@media (min-width: 992px) {
-  .services-grid {
-    grid-template-columns: repeat(4, 1fr);
+    flex-direction: column;
+    gap: 12px;
   }
 }

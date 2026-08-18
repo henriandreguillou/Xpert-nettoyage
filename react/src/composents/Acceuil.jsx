@@ -52,11 +52,11 @@ export default function Accueil() {
           </p>
 
           <div className="button-group">
-            <Link className="btn btn-services" to="/services">
+            <Link className="btn-acceuil btn-services" to="/services">
               Nos Services
             </Link>
 
-            <Link className="btn btn-rdv" to="/request">
+            <Link className="btn-acceuil btn-rdv" to="/request">
               Prendre rendez-vous
             </Link>
           </div>

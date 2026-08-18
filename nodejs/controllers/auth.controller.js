@@ -1,6 +1,6 @@
-const pool = require("../config/db");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const pool = require('../config/db');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 exports.loginAdmin = async (req, res) => {
   const { email, password } = req.body;

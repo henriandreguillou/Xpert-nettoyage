@@ -1,0 +1,282 @@
+/* --- GESTION DE L'AUTOFILL CHROME/WEBKIT --- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: #000 !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  border: 1px solid #000000 !important;
+  border-radius: 8px;
+}
+
+/* --- CONTENEUR PRINCIPAL AVEC IMAGE DE FOND --- */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background-image: url("../assets/image.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  padding: 25px;
+  box-sizing: border-box;
+}
+
+/* Titre principal avec ombre de texte */
+.container h2 {
+  color: #ffffff;
+  margin-bottom: 30px;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* --- FORMULAIRE EN EFFET VERRE DÉPOLI (GLASSMORPHISM) --- */
+.container form {
+  width: 100%;
+  max-width: 600px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  padding: 40px 50px;
+  border-radius: 20px;
+
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+/* --- LABELS --- */
+.container .form-label {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 5px;
+  display: block;
+  font-size: 14px;
+}
+
+/* --- CHAMPS DE SAISIE (INPUT, SELECT, TEXTAREA, DATEPICKER) --- */
+.container input,
+.container select,
+.container textarea,
+.react-datepicker-wrapper input {
+  width: 100%;
+  padding: 15px;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  background-color: #ffffff;
+  font-size: 15px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Zone de texte (description du besoin) */
+.container textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Champs verrouillés (Numéro de demande) */
+.container input[readOnly] {
+  background-color: #f2f2f2;
+  color: #555555;
+  border-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Focus sur tous les champs */
+.container input:focus,
+.container select:focus,
+.container textarea:focus,
+.react-datepicker-wrapper input:focus {
+  outline: none;
+  border-color: #a38a5e !important;
+  box-shadow: 0 0 0 3px rgba(163, 138, 94, 0.25);
+  color: #000000;
+  background-color: #ffffff;
+}
+
+/* Placeholder */
+.container input::placeholder,
+.container textarea::placeholder,
+.react-datepicker-wrapper input::placeholder {
+  color: #555555;
+}
+
+/* --- ADAPTATION REACT-DATEPICKER --- */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container input {
+  color: #000000 !important;
+}
+
+.react-datepicker {
+  border-radius: 12px;
+  border: 1px solid #000000;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  font-family: inherit;
+}
+
+.react-datepicker__header {
+  background-color: #1a1a1a;
+  border-bottom: none;
+}
+
+.react-datepicker__current-month,
+.react-datepicker-time__header,
+.react-datepicker__day-name {
+  color: #ffffff;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #a38a5e !important;
+  color: #ffffff !important;
+  border-radius: 6px;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e6e6e6;
+  border-radius: 6px;
+}
+
+.react-datepicker__day-names {
+  display: flex !important;
+  justify-content: space-around;
+  margin-bottom: 8px;
+}
+
+.react-datepicker__day-name {
+  color: #333 !important; /* Couleur du texte des jours */
+  font-weight: bold;
+  width: 2rem;
+  line-height: 2rem;
+  text-align: center;
+}
+
+/* --- BOUTONS --- */
+.container button {
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  box-sizing: border-box;
+}
+
+/* Bouton principal (Créer / Mettre à jour) */
+.container button[type="submit"],
+.container .btn-primary {
+  background: #a38a5e;
+  color: #ffffff;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.container button[type="submit"]:hover:not(:disabled),
+.container .btn-primary:hover:not(:disabled) {
+  background: #8e764d;
+}
+
+.container button:disabled {
+  background: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed;
+}
+
+/* Bouton secondaire (Annuler / Supprimer) */
+.container .btn-secondary {
+  background: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  width: 100%;
+  margin-left: 0 !important; /* Annule le ms-3 de Bootstrap pour empiler proprement */
+  margin-top: 10px;
+}
+
+.container .btn-secondary:hover {
+  background: #dc3545;
+  color: #ffffff;
+}
+
+/* --- MESSAGES D'ALERTE / STATUS --- */
+.container .alert,
+.success,
+.error {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.container .alert-success,
+.success {
+  color: #28a745;
+  border-left: 5px solid #28a745;
+}
+
+.container .alert-danger,
+.error {
+  color: #dc3545;
+  border-left: 5px solid #dc3545;
+}
+
+/* --- CARTE RÉCAPITULATIVE DU RENDEZ-VOUS --- */
+.container .card {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 25px !important;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+.container .card-body h4 {
+  color: #1a1a1a;
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #a38a5e;
+}
+
+.container .card-body p {
+  color: #000000;
+  margin-bottom: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.container .card-body p strong {
+  color: #1a1a1a;
+}

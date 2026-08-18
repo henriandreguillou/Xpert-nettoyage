@@ -9,21 +9,21 @@ dotenv.config();
 const app = express();
 
 // ======================
-// CREATE UPLOADS FOLDER SAFE
+// DOSSIER UPLOADS
 // ======================
 const uploadDir = path.join(__dirname, "uploads");
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
-  console.log("📁 uploads folder created");
+  console.log("📁 Dossier uploads créé");
 }
 
 // ======================
-// MIDDLEWARE (CORS mis à jour)
+// MIDDLEWARES
 // ======================
 app.use(
   cors({
-    origin: "*", // Ou votre domaine React ex: "http://localhost:3000"
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -32,7 +32,7 @@ app.use(
 app.use(express.json());
 
 // ======================
-// STATIC FILES
+// FICHIERS STATIQUES
 // ======================
 app.use("/uploads", express.static(uploadDir));
 
@@ -56,7 +56,7 @@ const authRoutes = require("./routes/auth.routes");
 app.use("/api/admin", authRoutes);
 
 // ======================
-// START SERVER
+// DEMARRAGE SERVEUR
 // ======================
 const PORT = process.env.PORT || 5000;
 

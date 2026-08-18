@@ -74,6 +74,7 @@ export default function Calendar() {
             type_client: rdv.type_client,
             societe: rdv.societe || "",
             status: rdv.status || "",
+            description: rdv.description || "", // 🔥 Récupération de la description
           },
         };
       });
@@ -94,8 +95,9 @@ export default function Calendar() {
   // Redirection vers le formulaire d'édition
   const handleEdit = (id) => {
     setSelectedRdv(null); // Ferme le modal
-    navigate(`/admin/appointment/edit/${id}`); // 👈 Le chemin doit être exact !
+    navigate(`/admin/appointment/edit/${id}`);
   };
+
   // Supprimer / Annuler le rendez-vous
   const deleteAppointment = async (id) => {
     if (!window.confirm("Êtes-vous sûr de vouloir annuler ce rendez-vous ?")) {
@@ -202,6 +204,13 @@ export default function Calendar() {
                 <p>
                   <b>Adresse : </b>
                   {`${selectedRdv.adresse} ${selectedRdv.complement_adresse ? selectedRdv.complement_adresse : ""}, ${selectedRdv.code_postal} ${selectedRdv.ville}`}
+                </p>
+              )}
+
+              {/* 🔥 Affichage de la description du besoin */}
+              {selectedRdv.description && (
+                <p>
+                  <b>Description: </b>{selectedRdv.description}
                 </p>
               )}
             </div>

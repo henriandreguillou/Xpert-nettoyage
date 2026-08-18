@@ -1,4 +1,6 @@
 const pool = require("../config/db");
+// En haut de votre fichier contrôleur (ajustez le chemin selon l'emplacement de mailer.js)
+const { sendConfirmationEmail } = require("../config/mailer"); 
 
 const generateCodeRQ = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -11,12 +13,15 @@ const generateCodeRQ = () => {
   return code;
 };
 
+
+
 exports.createRequest = async (req, res) => {
   try {
     console.log("BODY:", req.body);
     console.log("FILE:", req.file);
 
     const {
+      type_client,
       nom,
       prenom,
       email,
@@ -89,8 +94,28 @@ exports.createRequest = async (req, res) => {
 
     const result = await pool.query(query, values);
 
+    // ==========================================
+    // 📧 ENVOI DE L'E-MAIL DE CONFIRMATION
+    // ==========================================
+    try {
+      const mailInfo = await sendConfirmationEmail({
+        num_rq,
+        email: email.trim().toLowerCase(),
+        nom: nom.trim(),
+        prenom: prenom?.trim() || "",
+        type_client: type_client || "particulier",
+        phone: phone.trim(),
+        adresse: adresse.trim(),
+        ville: ville.trim(),
+        code_postal: code_postal.trim()
+      });
+      console.log(`✉️ Mail envoyé pour la demande ${num_rq} à ${email} (ID: ${mailInfo.messageId})`);
+    } catch (mailError) {
+      console.error("⚠️ Erreur lors de l'envoi de l'email :", mailError.message);
+    }
+
     return res.status(201).json({
-      message: "Request créée avec succès",
+      message: "Demande créée avec succès !",
       data: result.rows[0]
     });
 
