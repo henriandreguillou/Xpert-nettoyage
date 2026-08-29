@@ -1,4 +1,4 @@
-const mysql = require("mysql2/promise");
+/*const mysql = require("mysql2/promise");
 require("dotenv").config();
 
 // Vérification des variables d'environnement essentielles
@@ -30,6 +30,54 @@ pool.getConnection()
   })
   .catch((err) => {
     console.error("❌ Erreur connexion MySQL:", err.message);
+  });
+
+module.exports = pool;*/
+
+
+const { Pool } = require("pg");
+require("dotenv").config();
+
+// 1. Validation des variables d'environnement essentielles
+const requiredEnvVars = ["DB_USER", "DB_PASSWORD", "DB_HOST", "DB_NAME"];
+const missingVars = requiredEnvVars.filter((key) => !process.env[key]);
+
+if (missingVars.length > 0) {
+  throw new Error(`❌ Variables d'environnement DB manquantes : ${missingVars.join(", ")}`);
+}
+
+// 2. Logs de vérification au démarrage
+console.log("🟢 DB USER:", process.env.DB_USER);
+console.log("🟢 DB HOST:", process.env.DB_HOST);
+console.log("🟢 DB NAME:", process.env.DB_NAME);
+
+// 3. Détection de l'environnement (SSL requis pour le Cloud / Neon / Supabase)
+const isLocalhost =
+  process.env.DB_HOST === "localhost" || process.env.DB_HOST === "127.0.0.1";
+
+// 4. Configuration du Pool de connexions
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: String(process.env.DB_PASSWORD),
+  port: Number(process.env.DB_PORT) || 5432,
+  ssl: isLocalhost ? false : { rejectUnauthorized: false },
+});
+
+// 5. Écoute des erreurs globales du pool (évite le crash de l'application)
+pool.on("error", (err) => {
+  console.error("❌ Erreur inattendue sur un client PostgreSQL inactif :", err.message);
+});
+
+// 6. Test de connexion initial lors du lancement de l'application
+pool.connect()
+  .then((client) => {
+    console.log("✅ Connexion PostgreSQL réussie");
+    client.release();
+  })
+  .catch((err) => {
+    console.error("❌ Erreur de connexion PostgreSQL initiale :", err.message);
   });
 
 module.exports = pool;
