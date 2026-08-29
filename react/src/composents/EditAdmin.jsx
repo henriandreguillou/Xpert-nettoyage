@@ -1,31 +1,42 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../style-css/profileAdmin.css";
 
 export default function EditAdmin() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     nom: "",
     prenom: "",
     email: "",
+    phone: "",
   });
 
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5000/api/admin/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      try {
+        const res = await fetch("http://localhost:5000/api/admin/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      setForm({
-        nom: data.nom || "",
-        prenom: data.prenom || "",
-        email: data.email || "",
-      });
+        setForm({
+          nom: data.nom || "",
+          prenom: data.prenom || "",
+          email: data.email || "",
+          phone: data.phone || "",
+        });
+      } catch (err) {
+        console.error("Erreur chargement profil :", err);
+      }
     };
 
     fetchProfile();
@@ -37,64 +48,103 @@ export default function EditAdmin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setIsError(false);
 
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(
-        "http://localhost:5000/api/admin/me",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const res = await fetch("http://localhost:5000/api/admin/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.message || "Erreur");
+        setIsError(true);
+        setMessage(data.message || "Erreur lors de la mise à jour");
         return;
       }
 
-      setMessage("Profil mis à jour avec succès");
+      // Redirection immédiate vers la page de profil après succès
+      navigate("/admin/profile");
     } catch (err) {
+      setIsError(true);
       setMessage("Erreur serveur");
     }
   };
 
   return (
-    <div className="profile-container">
-      <h1>Modifier le profil</h1>
+    <div className="container">
+      <h2>Modifier le profil</h2>
 
-      <form onSubmit={handleSubmit} className="profile-card">
-        <input
-          name="nom"
-          value={form.nom}
-          onChange={handleChange}
-          placeholder="Nom"
-        />
+      {message && (
+        <div className={isError ? "error" : "success"}>
+          {message}
+        </div>
+      )}
 
-        <input
-          name="prenom"
-          value={form.prenom}
-          onChange={handleChange}
-          placeholder="Prénom"
-        />
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label className="form-label">Nom</label>
+          <input
+            type="text"
+            name="nom"
+            value={form.nom}
+            onChange={handleChange}
+            placeholder="Nom"
+          />
+        </div>
 
-        <input
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="Email"
-        />
+        <div>
+          <label className="form-label">Prénom</label>
+          <input
+            type="text"
+            name="prenom"
+            value={form.prenom}
+            onChange={handleChange}
+            placeholder="Prénom"
+          />
+        </div>
 
-        <button type="submit">Enregistrer</button>
+        <div>
+          <label className="form-label">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Email"
+          />
+        </div>
 
-        {message && <p>{message}</p>}
+        <div>
+          <label className="form-label">Téléphone</label>
+          <input
+            type="tel"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            placeholder="Téléphone"
+          />
+        </div>
+
+        <button type="submit" className="btn-primary">
+          Enregistrer
+        </button>
+
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => navigate("/admin/profile")}
+        >
+          Annuler
+        </button>
       </form>
     </div>
   );

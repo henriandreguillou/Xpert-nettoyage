@@ -6,7 +6,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // Configuration du transporteur SMTP (Port 465 SSL)
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp.hostinger.com",
   port: 465,
   secure: true,
   auth: {
@@ -45,7 +45,7 @@ const sendConfirmationEmail = async (data) => {
         </ul>
 
         <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #a0aec0;">
-          <p>Cordialement,<br><strong>L'équipe Xpert Nettoyage</strong></p>
+          <p>Cordialement,<br><strong>L'équipe XpertNettoyage</strong></p>
         </div>
       </div>
     `,

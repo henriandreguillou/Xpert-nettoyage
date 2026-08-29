@@ -5,6 +5,7 @@ const verifyAdmin = require("../middleware/auth.middleware");
 const {
   loginAdmin,
   updateAdmin,
+  updateAdminPassword,
   getAdminProfile,
   getRendezvous
 } = require("../controllers/auth.controller");
@@ -17,6 +18,8 @@ router.get("/me", verifyAdmin, getAdminProfile);
 
 // ✏️ Update admin
 router.put("/:id", verifyAdmin, updateAdmin);
+router.put("/password", verifyAdmin, updateAdminPassword);
+
 
 // 📅 Planning
 router.get("/calendar", verifyAdmin, getRendezvous);

@@ -16,6 +16,7 @@ import CreateAppointment from "./composents/CreateAppointment";
 import AdminRoute from "./composents/AdminRoute";
 import AdminProfile from "./composents/AdminProfile";
 import EditAdmin from "./composents/EditAdmin";
+import EditPassword from "./composents/EditPassword";
 import RequestsPage from "./composents/AllRequest";
 
 function Layout() {
@@ -88,6 +89,15 @@ function Layout() {
             element={
               <AdminRoute>
                 <EditAdmin />
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="/admin/profile/edit_password"
+            element={
+              <AdminRoute>
+                <EditPassword />
               </AdminRoute>
             }
           />

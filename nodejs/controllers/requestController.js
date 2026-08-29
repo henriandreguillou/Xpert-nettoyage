@@ -13,8 +13,6 @@ const generateCodeRQ = () => {
   return code;
 };
 
-
-
 exports.createRequest = async (req, res) => {
   try {
     console.log("BODY:", req.body);
@@ -128,7 +126,6 @@ exports.createRequest = async (req, res) => {
     });
   }
 };
-
 
 exports.getAllRequests = async (req, res) => {
     try {

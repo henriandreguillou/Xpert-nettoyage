@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
-import "../style-css/profileAdmin.css"
-export default function AdminProfile() {
+import { useNavigate } from "react-router-dom";
+import "../style-css/profileAdmin.css";
+
+export default function EditPassword() {
+
+  const navigate = useNavigate();
+
   const [admin, setAdmin] = useState(null);
 
   useEffect(() => {
@@ -46,10 +51,8 @@ export default function AdminProfile() {
         </p>
 
         <p>
-          <strong>Telephone :</strong> +33 6 70 52 51 66
+          <strong>Téléphone :</strong> {admin.phone}
         </p>
-
-    
 
         <div className="profile-actions">
           <button
@@ -60,11 +63,11 @@ export default function AdminProfile() {
             Modifier les informations
           </button>
 
-          <button
+          <button 
             onClick={() => {
-              window.location.href = "/admin/profile/password";
-            }}
-          >
+              window.location.href = "/admin/profile/edit_password";
+               }}
+               >
             Modifier le mot de passe
           </button>
         </div>

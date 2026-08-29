@@ -69,9 +69,9 @@ exports.loginAdmin = async (req, res) => {
 
 
 exports.updateAdmin = async (req, res) => {
-  const id = req.user.id; // ✅ FIX IMPORTANT
+  const id = req.user.id;
 
-  const { email, password, nom, prenom } = req.body;
+  const { email, password, nom, prenom, phone } = req.body;
 
   try {
     const result = await pool.query(
@@ -100,15 +100,17 @@ exports.updateAdmin = async (req, res) => {
         email = $1,
         password_hash = $2,
         nom = $3,
-        prenom = $4
-      WHERE id = $5
-      RETURNING id, email, nom, prenom
+        prenom = $4,
+        phone = $5
+      WHERE id = $6
+      RETURNING id, email, nom, prenom, phone, created_at
       `,
       [
         email || admin.email,
         passwordHash,
         nom || admin.nom,
         prenom || admin.prenom,
+        phone || admin.phone,
         id,
       ]
     );
@@ -126,12 +128,13 @@ exports.updateAdmin = async (req, res) => {
     });
   }
 };
+
 exports.getAdminProfile = async (req, res) => {
   try {
     const adminId = req.user.id;
 
     const result = await pool.query(
-      "SELECT id, email, nom, prenom FROM admin WHERE id = $1",
+      "SELECT id, email, nom, prenom, phone, created_at FROM admin WHERE id = $1",
       [adminId]
     );
 
@@ -194,20 +197,62 @@ exports.getRendezvous = async (req, res) => {
   }
 };
 
-exports.getAdminProfile = async (req, res) => {
+exports.updateAdminPassword = async (req, res) => {
+  const id = req.user.id;
+  const { currentPassword, password } = req.body;
+
+  if (!currentPassword || !password) {
+    return res.status(400).json({
+      message: "Veuillez fournir le mot de passe actuel et le nouveau mot de passe",
+    });
+  }
+
   try {
-    console.log("REQ USER =", req.user);
-
-    const adminId = req.user.id;
-
+    // 1. Récupération de l'admin
     const result = await pool.query(
-      "SELECT id, email, nom, prenom FROM admin WHERE id = $1",
-      [adminId]
+      "SELECT * FROM admin WHERE id = $1",
+      [id]
     );
 
-    return res.json(result.rows[0]);
+    const admin = result.rows[0];
+
+    if (!admin) {
+      return res.status(404).json({
+        message: "Administrateur introuvable",
+      });
+    }
+
+    // 2. Vérification de l'ancien mot de passe
+    const isMatch = await bcrypt.compare(currentPassword, admin.password_hash);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Le mot de passe actuel est incorrect",
+      });
+    }
+
+    // 3. Hash du nouveau mot de passe
+    const newPasswordHash = await bcrypt.hash(password, 10);
+
+    // 4. Mise à jour dans la base de données
+    await pool.query(
+      `
+      UPDATE admin
+      SET password_hash = $1
+      WHERE id = $2
+      `,
+      [newPasswordHash, id]
+    );
+
+    return res.status(200).json({
+      message: "Mot de passe mis à jour avec succès",
+    });
+
   } catch (err) {
-  console.error("GET ADMIN PROFILE ERROR =", err);
-  return res.status(500).json({ message: "Erreur serveur" });
+    console.error("UPDATE PASSWORD ERROR:", err);
+
+    return res.status(500).json({
+      message: "Erreur serveur",
+    });
   }
 };
