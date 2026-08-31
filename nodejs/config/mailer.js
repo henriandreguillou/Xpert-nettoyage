@@ -11,24 +11,20 @@ console.log("  - EMAIL_PORT :", process.env.EMAIL_PORT || "465 (default)");
 console.log("  - EMAIL_USER :", process.env.EMAIL_USER ? "✅ Présent" : "❌ ABSENT");
 console.log("  - EMAIL_PASS :", process.env.EMAIL_PASS ? "✅ Présent" : "❌ ABSENT");
 
+// IP directe du cluster mail Hostinger (bypass DNS & Proxy Cloudflare)
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.hostinger.com",
-  port: parseInt(process.env.EMAIL_PORT, 10) || 465,
-  secure: true, // SSL direct port 465
-  family: 4,    // ⚡ FORCE L'USAGE D'IPV4 UNIQUE (Bloque les erreurs ENETUNREACH IPv6)
+  port: parseInt(process.env.EMAIL_PORT, 10) || 587,
+  secure: false, // false pour le port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: false
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
+  }
 });
 
-// Test automatique de la connexion
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Erreur de connexion SMTP Hostinger :", error.message);
