@@ -16,18 +16,19 @@ const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.hostinger.com",
   port: parseInt(process.env.EMAIL_PORT, 10) || 2525,
   secure: false, // TLS via STARTTLS
-  requireTLS: true, // Forcer l'élévation TLS
+  requireTLS: true, // Force le chiffrement TLS avant toute transmission
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: false,
-    minVersion: 'TLSv1.2' // Assure la compatibilité avec les exigences modernes Hostinger
+    minVersion: 'TLSv1.2',
+    ciphers: 'HIGH:!:aNULL:!:eNULL:!:EXPORT:!:DES:!:RC4:!:MD5:!:PSK:!:SRP:!:CAMELLIA'
   },
-  connectionTimeout: 15000,
+  connectionTimeout: 20000,
   greetingTimeout: 10000,
-  socketTimeout: 15000,
+  socketTimeout: 20000,
 });
 
 transporter.verify((error, success) => {
