@@ -456,42 +456,35 @@ exports.deleteAppointment = async (req, res) => {
   const client = await pool.connect();
 
   try {
-    // 🔥 1. Vérifier si le rendez-vous existe et récupérer son request_num_rq
-    const checkApptQuery = `SELECT * FROM appointment WHERE id = $1`;
+    await client.query('BEGIN');
+
+    // 1. Récupérer le rendez-vous pour obtenir la clé étrangère de la requête
+    const checkApptQuery = `SELECT request_num_rq FROM appointment WHERE id = $1`;
     const checkApptResult = await client.query(checkApptQuery, [id]);
 
     if (checkApptResult.rows.length === 0) {
-      client.release();
+      await client.query('ROLLBACK');
       return res.status(404).json({
         message: `Le rendez-vous avec l'ID ${id} n'existe pas.`
       });
     }
 
-    const appointment = checkApptResult.rows[0];
-    const requestNumRq = appointment.request_num_rq;
+    const requestNumRq = checkApptResult.rows[0].request_num_rq;
 
-    // --- DÉBUT DE LA TRANSACTION ---
-    await client.query('BEGIN');
+    // 2. Supprimer le rendez-vous
+    const deleteApptQuery = `DELETE FROM appointment WHERE id = $1`;
+    await client.query(deleteApptQuery, [id]);
 
-    // 🔥 2. Supprimer le rendez-vous
-    const deleteQuery = `DELETE FROM appointment WHERE id = $1`;
-    await client.query(deleteQuery, [id]);
-
-    // 🔥 3. Mettre à jour le statut de la request associée (ex: repasser en "en attente")
+    // 3. Supprimer définitivement la demande associée
     if (requestNumRq) {
-      const updateRequestQuery = `
-        UPDATE request 
-        SET status = 'en attente' 
-        WHERE num_rq = $1
-      `;
-      await client.query(updateRequestQuery, [requestNumRq]);
+      const deleteRequestQuery = `DELETE FROM request WHERE num_rq = $1`;
+      await client.query(deleteRequestQuery, [requestNumRq]);
     }
 
     await client.query('COMMIT');
-    // ---------------------------------
 
     return res.status(200).json({
-      message: "Rendez-vous supprimé avec succès et demande remise en attente",
+      message: "Rendez-vous et demande associée supprimés définitivement",
       idDeleted: id
     });
 
@@ -499,10 +492,11 @@ exports.deleteAppointment = async (req, res) => {
     await client.query('ROLLBACK');
     console.error("🔥 POSTGRES ERROR (DELETE):", error);
     return res.status(500).json({
-      message: "Erreur lors de la suppression du rendez-vous",
+      message: "Erreur lors de la suppression totale",
       error: error.message
     });
   } finally {
+    // Une seule libération du client garantie pour tous les cas
     client.release();
   }
 };
