@@ -25,6 +25,8 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+console.log("⏳ Test de connexion au serveur SMTP Hostinger en cours...");
+
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Erreur de connexion SMTP Hostinger :", error.message);
