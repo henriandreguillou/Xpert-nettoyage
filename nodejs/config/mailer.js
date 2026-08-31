@@ -1,28 +1,39 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
 
+// Chargement fallback pour le dev local
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// Configuration SMTP Hostinger sur port 465 (SSL)
+// Logs de contrôle au chargement pour le débug Render
+console.log("🔍 Verification des variables SMTP :");
+console.log("  - EMAIL_HOST :", process.env.EMAIL_HOST || "smtp.hostinger.com (default)");
+console.log("  - EMAIL_PORT :", process.env.EMAIL_PORT || "465 (default)");
+console.log("  - EMAIL_USER :", process.env.EMAIL_USER ? "✅ Présent" : "❌ ABSENT");
+console.log("  - EMAIL_PASS :", process.env.EMAIL_PASS ? "✅ Présent" : "❌ ABSENT");
+
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.hostinger.com",
   port: parseInt(process.env.EMAIL_PORT, 10) || 465,
-  secure: true, // TRUE impératif pour le port 465 (SSL direct)
+  secure: true, // Port 465 SSL
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: false
-  }
+  },
+  // Evite de bloquer indéfiniment si le serveur SMTP est injoignable
+  connectionTimeout: 10000, 
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
 });
 
-// Test automatique de la connexion au lancement
+// Test automatique de la connexion
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Erreur de connexion SMTP Hostinger :", error.message);
   } else {
-    console.log("✅ Connecté au serveur SMTP avec succès !");
+    console.log("✅ Connecté au serveur SMTP Hostinger avec succès !");
   }
 });
 
