@@ -12,12 +12,11 @@ exports.createAppointment = async (req, res) => {
       date_rdv,
       heure_rdv,
       admin_id,
-      description // 🔥 Récupération du champ description
+      description
     } = req.body;
 
-    // 🔥 1. Validation champs obligatoires
+    // 1. Validation des champs obligatoires
     if (!request_num_rq || !date_rdv || !heure_rdv || !admin_id) {
-      client.release();
       return res.status(400).json({
         message: "Tous les champs sont obligatoires (request_num_rq, date_rdv, heure_rdv, admin_id)"
       });
@@ -25,43 +24,39 @@ exports.createAppointment = async (req, res) => {
 
     const cleanRequestNum = request_num_rq.trim();
 
-    // 🔥 2. Vérifier existence request
+    // 2. Vérifier existence request
     const checkRequestQuery = `
       SELECT num_rq 
       FROM request 
       WHERE num_rq = $1
     `;
-
     const checkRequestResult = await client.query(checkRequestQuery, [cleanRequestNum]);
 
     if (checkRequestResult.rows.length === 0) {
-      client.release();
       return res.status(404).json({
         message: `La demande '${request_num_rq}' n'existe pas.`
       });
     }
 
-    // 🔥 3. Vérifier disponibilité créneau
+    // 3. Vérifier disponibilité créneau
     const checkSlotQuery = `
       SELECT id 
       FROM appointment
       WHERE date_appointment = $1 
       AND heure_appointment = $2
     `;
-
     const checkSlotResult = await client.query(checkSlotQuery, [date_rdv, heure_rdv]);
 
     if (checkSlotResult.rows.length > 0) {
-      client.release();
       return res.status(400).json({
         message: "Ce créneau est déjà réservé"
       });
     }
 
-    // --- DEBUT DE LA TRANSACTION ---
+    // --- DÉBUT DE LA TRANSACTION ---
     await client.query('BEGIN');
 
-    // 🔥 4. INSERT dans appointment (avec description)
+    // 4. INSERT dans appointment
     const insertAppointmentQuery = `
       INSERT INTO appointment (
         request_num_rq,
@@ -81,25 +76,24 @@ exports.createAppointment = async (req, res) => {
       date_rdv,
       heure_rdv,
       "programmé",
-      description || null // Passe null si la description est vide
+      description || null
     ];
 
     const insertResult = await client.query(insertAppointmentQuery, appointmentValues);
     const newAppointmentId = insertResult.rows[0].id;
 
-    // 🔥 4b. Mettre à jour le statut de la demande
+    // 4b. Mettre à jour le statut de la demande
     const updateRequestStatusQuery = `
       UPDATE request
       SET status = 'programmé'
       WHERE num_rq = $1
     `;
-    
     await client.query(updateRequestStatusQuery, [cleanRequestNum]);
 
     await client.query('COMMIT');
-    // ---------------------------------
+    // --- FIN DE LA TRANSACTION ---
 
-    // 🔥 5. JOIN pour retour complet (incluant a.description)
+    // 5. Récupération des données associées
     const selectJoinedQuery = `
       SELECT 
         a.id AS appointment_id,
@@ -141,10 +135,10 @@ exports.createAppointment = async (req, res) => {
     const appointmentResult = await client.query(selectJoinedQuery, [newAppointmentId]);
     const createdAppointment = appointmentResult.rows[0];
 
-    // 🔥 6. ENVOI DE L'E-MAIL DE CONFIRMATION
+    // ⚡ 6. ENVOI DE L'E-MAIL DE FAÇON ASYNCHRONE (Non-bloquant)
+    // On libère la réponse HTTP immédiatement sans faire un `await` sur l'envoi de mail
     if (createdAppointment.request && createdAppointment.request.email) {
       const { email, nom, prenom, num_rq } = createdAppointment.request;
-      
       const clientName = prenom ? `${prenom} ${nom}`.trim() : (nom || "");
 
       const formattedDate = new Date(date_rdv).toLocaleDateString("fr-FR", {
@@ -153,24 +147,23 @@ exports.createAppointment = async (req, res) => {
         year: "numeric",
       });
 
-      try {
-        await sendAppointmentEmail({
-          email: email,
-          clientName: clientName,
-          num_rq: num_rq,
-          date_rdv: formattedDate,
-          heure_rdv: heure_rdv,
-          description: description, // Transmis au service d'e-mail si nécessaire
-          isEdit: false,
-        });
-        console.log(`✉️ E-mail de confirmation envoyé à ${email}`);
-      } catch (emailErr) {
-        console.error("⚠️ Erreur lors de l'envoi de l'e-mail :", emailErr.message);
-      }
+      // Exécution en tâche de fond
+      sendAppointmentEmail({
+        email: email,
+        clientName: clientName,
+        num_rq: num_rq,
+        date_rdv: formattedDate,
+        heure_rdv: heure_rdv,
+        description: description,
+        isEdit: false,
+      })
+      .then(() => console.log(`✉️ E-mail envoyé avec succès à ${email}`))
+      .catch((emailErr) => console.error("⚠️ Erreur lors de l'envoi de l'e-mail :", emailErr.message));
     }
 
+    // Réponse rapide au client React
     return res.status(201).json({
-      message: "Rendez-vous créé et e-mail envoyé avec succès",
+      message: "Rendez-vous créé avec succès",
       appointment: createdAppointment
     });
 
@@ -189,10 +182,10 @@ exports.createAppointment = async (req, res) => {
       error: error.message
     });
   } finally {
+    // S'assure de toujours libérer le client pour la piscine de connexions
     client.release();
   }
 };
-
 exports.getTakenHoursByDate = async (req, res) => {
   try {
     const { date } = req.params;
