@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../style-css/profileAdmin.css";
 
+// URL d'API dynamique avec fallback sur Render
+const API_BASE_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+
 export default function EditPassword() {
-
   const navigate = useNavigate();
-
   const [admin, setAdmin] = useState(null);
 
   useEffect(() => {
@@ -13,7 +14,7 @@ export default function EditPassword() {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch("http://localhost:5000/api/admin/me", {
+        const res = await fetch(`${API_BASE_URL}/api/admin/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -55,19 +56,11 @@ export default function EditPassword() {
         </p>
 
         <div className="profile-actions">
-          <button
-            onClick={() => {
-              window.location.href = "/admin/profile/edit";
-            }}
-          >
+          <button onClick={() => navigate("/admin/profile/edit")}>
             Modifier les informations
           </button>
 
-          <button 
-            onClick={() => {
-              window.location.href = "/admin/profile/edit_password";
-               }}
-               >
+          <button onClick={() => navigate("/admin/profile/edit_password")}>
             Modifier le mot de passe
           </button>
         </div>

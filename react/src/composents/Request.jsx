@@ -4,6 +4,9 @@ import axios from "axios";
 
 import "../style-css/request.css";
 
+// URL d'API dynamique avec fallback sur Render
+const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+
 function Request() {
   const [searchParams] = useSearchParams();
   const typeFromUrl = searchParams.get("type");
@@ -77,7 +80,8 @@ function Request() {
         formData.append("piece_jointe", file);
       }
 
-      await axios.post("http://localhost:5000/request", formData, {
+      // Requête mise à jour vers l'URL Render
+      await axios.post(`${API_URL}/request`, formData, {
         headers: {
           "Content-Type": "multipart/form-data"
         }
@@ -139,7 +143,7 @@ function Request() {
         <input name="adresse" placeholder="Adresse *" value={form.adresse} onChange={handleChange} required />
         <input name="ville" placeholder="Ville *" value={form.ville} onChange={handleChange} required />
         <input name="code_postal" placeholder="Code postal *" value={form.code_postal} onChange={handleChange} required />
-        
+
         {/* 🏢 COMPLÉMENT D'ADRESSE (FACULTATIF) */}
         <input 
           name="complement_adresse" 

@@ -1,17 +1,20 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
 
-// S'assure de charger le fichier .env
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+// Chargement sécurisé du .env depuis la racine du projet
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// Configuration du transporteur SMTP (Port 465 SSL)
+// Configuration SMTP optimisée (Port 587 STARTTLS)
 const transporter = nodemailer.createTransport({
-  host: "smtp.hostinger.com",
-  port: 465,
-  secure: true,
+  host: process.env.EMAIL_HOST || "smtp.hostinger.com",
+  port: parseInt(process.env.EMAIL_PORT, 10) || 587,
+  secure: false, // 'false' pour le port 587 (STARTTLS)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false, // Évite le rejet de certificat SSL auto-signé sur Render
   },
 });
 
@@ -22,7 +25,7 @@ const transporter = nodemailer.createTransport({
 const sendConfirmationEmail = async (data) => {
   const { num_rq, email, nom, prenom, type_client, phone, adresse, ville, code_postal } = data;
 
-  const clientName = type_client === "entreprise" ? nom : `${prenom || ""} ${nom}`;
+  const clientName = type_client === "entreprise" ? nom : `${prenom || ""} ${nom}`.trim();
 
   const mailOptions = {
     from: `"Xpert Nettoyage" <${process.env.EMAIL_USER}>`,
@@ -45,25 +48,18 @@ const sendConfirmationEmail = async (data) => {
         </ul>
 
         <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #a0aec0;">
-          <p>Cordialement,<br><strong>L'équipe XpertNettoyage</strong></p>
+          <p>Cordialement,<br><strong>L'équipe Xpert Nettoyage</strong></p>
         </div>
       </div>
     `,
   };
 
-  const info = await transporter.sendMail(mailOptions);
-  return info;
+  return await transporter.sendMail(mailOptions);
 };
 
 /**
  * Envoie un e-mail de confirmation ou de modification de rendez-vous au client
  * @param {Object} data - Données du rendez-vous
- * @param {string} data.email - Adresse e-mail du destinataire
- * @param {string} [data.clientName] - Nom du client (optionnel)
- * @param {string} data.num_rq - Numéro de la demande
- * @param {string} data.date_rdv - Date au format lisible (ex: DD/MM/YYYY)
- * @param {string} data.heure_rdv - Heure au format HH:mm
- * @param {boolean} [data.isEdit=false] - Indique s'il s'agit d'une modification
  */
 const sendAppointmentEmail = async (data) => {
   const { email, clientName, num_rq, date_rdv, heure_rdv, isEdit = false } = data;
@@ -102,8 +98,7 @@ const sendAppointmentEmail = async (data) => {
     `,
   };
 
-  const info = await transporter.sendMail(mailOptions);
-  return info;
+  return await transporter.sendMail(mailOptions);
 };
 
 module.exports = {

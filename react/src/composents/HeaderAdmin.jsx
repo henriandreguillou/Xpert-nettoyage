@@ -3,6 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.jpeg";
 import "../style-css/headerAdmin.css";
 
+// Définition dynamique de l'URL API
+const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+
 export default function HeaderAdmin() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [admin, setAdmin] = useState(null);
@@ -30,15 +33,23 @@ export default function HeaderAdmin() {
     const fetchAdmin = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/api/admin/me", {
+        if (!token) return;
+
+        const res = await fetch(`${API_URL}/api/admin/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (!res.ok) {
+          throw new Error("Échec de la récupération du profil");
+        }
+
         const data = await res.json();
         setAdmin(data);
       } catch (err) {
-        console.error(err);
+        console.error("Erreur lors de la récupération de l'admin :", err);
       }
     };
+
     fetchAdmin();
   }, []);
 
@@ -71,7 +82,7 @@ export default function HeaderAdmin() {
                 className="admin-profile__trigger"
                 onClick={() => setOpenProfile(!openProfile)}
               >
-                 {admin.prenom} {admin.nom}
+                {admin.prenom} {admin.nom}
               </button>
 
               {openProfile && (

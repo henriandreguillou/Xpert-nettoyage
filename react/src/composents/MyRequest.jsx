@@ -6,38 +6,32 @@ import {
   useSearchParams
 } from "react-router-dom";
 
-export default function MesRendezvous () {
+// Configuration de la base de l'API avec fallback sur votre serveur Render
+const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
 
+export default function MesRendezvous() {
   const [numRdv, setNumRdv] = useState("");
   const [rendezvous, setRendezvous] = useState(null);
   const [message, setMessage] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
-
   const [searchParams] = useSearchParams();
   const type = searchParams.get("type");
 
-  const handleSearch = async (numero = numRdv) => {
-
+  const fetchRdv = async (numero) => {
     if (!numero) return;
 
     try {
-
       setMessage("");
 
-      const response = await axios.get(
-        `http://localhost:5000/rendezvous/${numero}`
-      );
+      // Modifié pour utiliser API_URL et la route correcte
+      const response = await axios.get(`${API_URL}/appointment/rendezvous/${numero}`);
 
       setRendezvous(response.data.data);
-
     } catch (error) {
-
       console.error(error);
-
       setRendezvous(null);
-
       setMessage(
         error.response?.data?.message ||
         "Erreur récupération rendez-vous"
@@ -45,51 +39,26 @@ export default function MesRendezvous () {
     }
   };
 
+  const handleSearch = () => {
+    fetchRdv(numRdv);
+  };
+
   // Recharge automatique après modification
   useEffect(() => {
+    const numero = location.state?.numRdv;
 
-    const loadRdv = async () => {
-
-      const numero = location.state?.numRdv;
-
-      if (!location.state?.refresh || !numero) {
-        return;
-      }
-
-      try {
-
-        setNumRdv(numero);
-
-        const response = await axios.get(
-          `http://localhost:5000/rendezvous/${numero}`
-        );
-
-        setRendezvous(response.data.data);
-
-      } catch (error) {
-
-        console.error(error);
-
-        setMessage(
-          error.response?.data?.message ||
-          "Erreur récupération rendez-vous"
-        );
-      }
-    };
-
-    loadRdv();
-
+    if (location.state?.refresh && numero) {
+      setNumRdv(numero);
+      fetchRdv(numero);
+    }
   }, [location.state]);
 
   const handleModify = () => {
-
     navigate(`/modifier/${numRdv}`);
-
   };
 
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-
       <h1>Rechercher un rendez-vous</h1>
 
       <input
@@ -99,7 +68,7 @@ export default function MesRendezvous () {
         onChange={(e) => setNumRdv(e.target.value)}
       />
 
-      <button onClick={() => handleSearch()}>
+      <button onClick={handleSearch}>
         Rechercher
       </button>
 
@@ -115,7 +84,6 @@ export default function MesRendezvous () {
             borderRadius: "10px"
           }}
         >
-
           <h2>
             {rendezvous.nom} {rendezvous.prenom}
           </h2>
@@ -141,11 +109,8 @@ export default function MesRendezvous () {
           <button onClick={handleModify}>
             Modifier mon rendez-vous
           </button>
-
         </div>
       )}
-
     </div>
   );
-};
-
+}

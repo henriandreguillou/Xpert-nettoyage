@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../style-css/profileAdmin.css";
 
+// URL d'API dynamique avec fallback sur Render
+const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+
 export default function EditAdmin() {
   const navigate = useNavigate();
 
@@ -20,7 +23,7 @@ export default function EditAdmin() {
       const token = localStorage.getItem("token");
 
       try {
-        const res = await fetch("http://localhost:5000/api/admin/me", {
+        const res = await fetch(`${API_URL}/api/admin/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -54,7 +57,7 @@ export default function EditAdmin() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch("http://localhost:5000/api/admin/me", {
+      const res = await fetch(`${API_URL}/api/admin/me`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -11,7 +11,8 @@ import "../style-css/CreateAppointment.css";
 
 registerLocale("fr", fr);
 
-const API_BASE_URL = "http://localhost:5000";
+// URL d'API dynamique avec fallback sur Render
+const API_BASE_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
 
 export default function CreateAppointment() {
   const [searchParams] = useSearchParams();
