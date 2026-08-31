@@ -8,14 +8,17 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.hostinger.com",
   port: parseInt(process.env.EMAIL_PORT, 10) || 587,
-  secure: false, // 'false' pour le port 587 (STARTTLS)
+  secure: false, // TLS
+  pool: true,    // ⚡ GARDE LA CONNEXION OUVERTE (gain de temps majeur)
+  maxConnections: 5,
+  maxMessages: 100,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   tls: {
-    rejectUnauthorized: false, // Évite le rejet de certificat SSL auto-signé sur Render
-  },
+    rejectUnauthorized: false
+  }
 });
 
 /**
