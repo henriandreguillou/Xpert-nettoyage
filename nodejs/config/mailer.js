@@ -11,21 +11,22 @@ console.log("  - EMAIL_PORT :", process.env.EMAIL_PORT || "465 (default)");
 console.log("  - EMAIL_USER :", process.env.EMAIL_USER ? "✅ Présent" : "❌ ABSENT");
 console.log("  - EMAIL_PASS :", process.env.EMAIL_PASS ? "✅ Présent" : "❌ ABSENT");
 
+// Configuration SMTP Hostinger sur port 587 (STARTTLS) - Compatible Cloud / Render
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.hostinger.com",
-  port: parseInt(process.env.EMAIL_PORT, 10) || 465,
-  secure: true, // Port 465 SSL
+  port: parseInt(process.env.EMAIL_PORT, 10) || 587,
+  secure: false, // FALSE impératif pour le port 587 (STARTTLS)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   tls: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
+    ciphers: "SSLv3"
   },
-  // Evite de bloquer indéfiniment si le serveur SMTP est injoignable
-  connectionTimeout: 10000, 
-  greetingTimeout: 5000,
-  socketTimeout: 10000,
+  connectionTimeout: 15000, // Timeout de 15s
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 });
 
 // Test automatique de la connexion
