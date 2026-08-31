@@ -1,9 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../style-css/login.css" 
+import "../style-css/login.css";
 
-export default function Login () {
+// Use environment variables for API endpoints in production
+const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+
+export default function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -18,13 +21,10 @@ export default function Login () {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/admin/login",
-        {
-          email,
-          password,
-        }
-      );
+      const res = await axios.post(`${API_URL}/api/admin/login`, {
+        email,
+        password,
+      });
 
       const token = res.data?.token;
 
@@ -33,16 +33,16 @@ export default function Login () {
       }
 
       localStorage.setItem("token", token);
-
       navigate("/admin/calendar");
     } catch (err) {
       console.error("Login error:", err);
 
-      setError(
+      // Handle server error response vs network error
+      const errorMessage =
         err.response?.data?.message ||
-          err.message ||
-          "Email ou mot de passe incorrect"
-      );
+        (err.request ? "Impossible de contacter le serveur" : err.message);
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -54,23 +54,29 @@ export default function Login () {
         <h2>Admin</h2>
 
         <form onSubmit={handleSubmit}>
-          {error && <p style={{ color: "red" }}>{error}</p>}
+          {error && <p className="error-message">{error}</p>}
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="form-group">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="username"
+            />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="form-group">
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </div>
 
           <button type="submit" disabled={loading}>
             {loading ? "Connexion..." : "Se connecter"}
@@ -79,4 +85,4 @@ export default function Login () {
       </div>
     </div>
   );
-};
+}
