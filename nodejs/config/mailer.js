@@ -1,17 +1,14 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
 
-// Chargement sécurisé du .env depuis la racine du projet
+// Chargement fallback du .env pour le dev local (ignoré en prod sur Render)
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// Configuration SMTP optimisée (Port 587 STARTTLS)
+// Configuration SMTP robuste
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.hostinger.com",
   port: parseInt(process.env.EMAIL_PORT, 10) || 587,
-  secure: false, // TLS
-  pool: true,    // ⚡ GARDE LA CONNEXION OUVERTE (gain de temps majeur)
-  maxConnections: 5,
-  maxMessages: 100,
+  secure: false, // TLS via STARTTLS
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -21,12 +18,24 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// TEST DE CONNEXION AU DÉMARRAGE : Affiche l'erreur exacte dans les logs Render
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Erreur de connexion SMTP Hostinger :", error.message);
+  } else {
+    console.log("✅ Connecté au serveur SMTP avec succès !");
+  }
+});
+
 /**
- * Envoie un e-mail de confirmation de demande d'estimation au client
- * @param {Object} data - Données du formulaire et numéro de demande
+ * Envoie un e-mail de confirmation de demande d'estimation
  */
 const sendConfirmationEmail = async (data) => {
   const { num_rq, email, nom, prenom, type_client, phone, adresse, ville, code_postal } = data;
+
+  if (!process.env.EMAIL_USER) {
+    throw new Error("Variable EMAIL_USER manquante dans l'environnement");
+  }
 
   const clientName = type_client === "entreprise" ? nom : `${prenom || ""} ${nom}`.trim();
 
@@ -61,11 +70,14 @@ const sendConfirmationEmail = async (data) => {
 };
 
 /**
- * Envoie un e-mail de confirmation ou de modification de rendez-vous au client
- * @param {Object} data - Données du rendez-vous
+ * Envoie un e-mail de rendez-vous
  */
 const sendAppointmentEmail = async (data) => {
   const { email, clientName, num_rq, date_rdv, heure_rdv, isEdit = false } = data;
+
+  if (!process.env.EMAIL_USER) {
+    throw new Error("Variable EMAIL_USER manquante dans l'environnement");
+  }
 
   const subject = isEdit
     ? `Modification de votre rendez-vous (Demande ${num_rq})`
