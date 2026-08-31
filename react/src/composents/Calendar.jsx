@@ -8,6 +8,9 @@ import frLocale from "@fullcalendar/core/locales/fr";
 import { useNavigate } from "react-router-dom";
 import "../style-css/calendar.css";
 
+// ⚡ URL dynamique basculant sur Render si la variable .env n'est pas définie
+const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+
 export default function Calendar() {
   const [events, setEvents] = useState([]);
   const [selectedRdv, setSelectedRdv] = useState(null);
@@ -28,8 +31,9 @@ export default function Calendar() {
     }
 
     try {
+      // Utilisation de API_URL au lieu de localhost
       const res = await axios.get(
-        "http://localhost:5000/appointment/calendar",
+        `${API_URL}/appointment/calendar`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -74,7 +78,7 @@ export default function Calendar() {
             type_client: rdv.type_client,
             societe: rdv.societe || "",
             status: rdv.status || "",
-            description: rdv.description || "", // 🔥 Récupération de la description
+            description: rdv.description || "",
           },
         };
       });
@@ -94,7 +98,7 @@ export default function Calendar() {
 
   // Redirection vers le formulaire d'édition
   const handleEdit = (id) => {
-    setSelectedRdv(null); // Ferme le modal
+    setSelectedRdv(null);
     navigate(`/admin/appointment/edit/${id}`);
   };
 
@@ -107,13 +111,13 @@ export default function Calendar() {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.delete(`http://localhost:5000/appointment/${id}`, {
+      // Utilisation de API_URL au lieu de localhost
+      await axios.delete(`${API_URL}/appointment/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      // Met à jour la vue sans recharger toute la page
       setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
       setSelectedRdv(null);
     } catch (error) {
@@ -207,7 +211,6 @@ export default function Calendar() {
                 </p>
               )}
 
-              {/* 🔥 Affichage de la description du besoin */}
               {selectedRdv.description && (
                 <p>
                   <b>Description: </b>{selectedRdv.description}

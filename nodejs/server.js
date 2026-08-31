@@ -8,6 +8,8 @@ dotenv.config();
 
 const app = express();
 
+// ⚡ CHARGEMENT DU SERVICE MAIL POUR TESTER LA CONNEXION SMTP AU DÉMARRAGE
+require("./config/mailer");
 // ======================
 // DOSSIER UPLOADS
 // ======================
