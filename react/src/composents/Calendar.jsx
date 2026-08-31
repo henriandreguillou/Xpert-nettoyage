@@ -8,8 +8,8 @@ import frLocale from "@fullcalendar/core/locales/fr";
 import { useNavigate } from "react-router-dom";
 import "../style-css/calendar.css";
 
-// ⚡ URL dynamique basculant sur Render si la variable .env n'est pas définie
-const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+import {API_URL} from "../config/api"
+
 
 export default function Calendar() {
   const [events, setEvents] = useState([]);

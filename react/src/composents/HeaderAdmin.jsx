@@ -3,8 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.jpeg";
 import "../style-css/headerAdmin.css";
 
-// Définition dynamique de l'URL API
-const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+import {API_URL} from "../config/api"
 
 export default function HeaderAdmin() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -69,7 +68,7 @@ export default function HeaderAdmin() {
         <div className={`admin-header__menu ${isMenuOpen ? "admin-header__menu--open" : ""}`}>
           <div className="admin-header__links">
             <Link className="admin-header__link" to="/admin/calendar">Planning</Link>
-            <Link className="admin-header__link" to="/admin/request">Rendez-vous</Link>
+            <Link className="admin-header__link" to="/admin/requests">Rendez-vous</Link>
             <Link className="admin-header__link" to="/">Retour au site</Link>
           </div>
         </div>

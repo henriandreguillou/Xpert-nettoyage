@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../style-css/profileAdmin.css";
 
-// URL d'API dynamique avec fallback sur Render
-const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+import {API_URL} from "../config/api"
 
 export default function EditPassword() {
   const navigate = useNavigate();

@@ -4,8 +4,8 @@ import axios from "axios";
 
 import "../style-css/request.css";
 
-// URL d'API dynamique avec fallback sur Render
-const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+import {API_URL} from "../config/api"
+
 
 function Request() {
   const [searchParams] = useSearchParams();

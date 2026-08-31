@@ -11,8 +11,8 @@ import "../style-css/CreateAppointment.css";
 
 registerLocale("fr", fr);
 
-// URL d'API dynamique avec fallback sur Render
-const API_BASE_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+import {API_URL} from "../config/api"
+
 
 export default function CreateAppointment() {
   const [searchParams] = useSearchParams();
@@ -69,7 +69,7 @@ export default function CreateAppointment() {
 
   const fetchExistingAppointment = async (id, token) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/appointment/${id}`, {
+      const response = await axios.get(`${API_URL}/appointment/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = response.data;
@@ -138,12 +138,17 @@ export default function CreateAppointment() {
       return;
     }
 
-    setStatus({ loading: true, message: "", appointment: null });
+    // Message visuel explicite en cas de serveur lent / en veille
+    setStatus({
+      loading: true,
+      message: "Enregistrement en cours... Veuillez patienter quelques instants.",
+      appointment: null,
+    });
 
     try {
       const endpoint = isEditMode
-        ? `${API_BASE_URL}/appointment/${appointmentId}`
-        : `${API_BASE_URL}/appointment`;
+        ? `${API_URL}/appointment/${appointmentId}`
+        : `${API_URL}/appointment`;
 
       const method = isEditMode ? axios.put : axios.post;
 
@@ -157,24 +162,20 @@ export default function CreateAppointment() {
 
       setStatus({
         loading: false,
-        message: response.data.message || (isEditMode ? "Rendez-vous modifié avec succès" : "Rendez-vous créé avec succès"),
+        message: response.data.message || (isEditMode ? "Rendez-vous modifié avec succès !" : "Rendez-vous créé avec succès !"),
         appointment: response.data.appointment,
       });
 
-      // En mode création, reinitialisation des champs optionnels
-      if (!isEditMode) {
-        setFormData((prev) => ({
-          ...prev,
-          date_rdv: "",
-          heure_rdv: "",
-          description: "",
-        }));
-      }
+      // Redirection automatique vers le calendrier après 1.5 seconde
+      setTimeout(() => {
+        navigate("/admin/calendar");
+      }, 1500);
+
     } catch (error) {
       console.error(error.response?.data || error.message);
       setStatus({
         loading: false,
-        message: error.response?.data?.message || "Erreur serveur",
+        message: error.response?.data?.message || "Erreur lors de la connexion au serveur",
         appointment: null,
       });
     }
@@ -188,7 +189,7 @@ export default function CreateAppointment() {
     }
 
     if (isEditMode) {
-      navigate("/calendar");
+      navigate("/admin/calendar");
       return;
     }
 
@@ -218,7 +219,7 @@ export default function CreateAppointment() {
         </h2>
 
         {status.message && (
-          <div className={`alert ${status.appointment ? "alert-success" : "alert-danger"}`}>
+          <div className={`alert ${status.appointment ? "alert-success" : status.loading ? "alert-info" : "alert-danger"}`}>
             {status.message}
           </div>
         )}
@@ -243,11 +244,12 @@ export default function CreateAppointment() {
               onChange={handleDateChange}
               dateFormat="dd/MM/yyyy"
               minDate={new Date()}
-              locale="fr"                     
-              calendarStartDay={1}           
+              locale="fr"
+              calendarStartDay={1}
               placeholderText="Sélectionnez une date..."
               className="form-input"
               required
+              disabled={status.loading}
             />
           </div>
 
@@ -260,6 +262,7 @@ export default function CreateAppointment() {
               value={formData.heure_rdv}
               onChange={handleChange}
               required
+              disabled={status.loading}
             />
           </div>
 
@@ -272,17 +275,32 @@ export default function CreateAppointment() {
               placeholder="Précisez le besoin ou le motif du rendez-vous..."
               value={formData.description}
               onChange={handleChange}
+              disabled={status.loading}
             ></textarea>
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-submit" disabled={status.loading}>
-              {status.loading
-                ? isEditMode ? "Modification..." : "Création..."
-                : isEditMode ? "Mettre à jour" : "Créer le rendez-vous"}
+            <button 
+              type="submit" 
+              className="btn btn-submit" 
+              disabled={status.loading}
+              style={{ cursor: status.loading ? "not-allowed" : "pointer" }}
+            >
+              {status.loading ? (
+                <span>Chargement...</span>
+              ) : isEditMode ? (
+                "Mettre à jour"
+              ) : (
+                "Créer le rendez-vous"
+              )}
             </button>
 
-            <button type="button" className="btn btn-cancel" onClick={handleCancel}>
+            <button 
+              type="button" 
+              className="btn btn-cancel" 
+              onClick={handleCancel}
+              disabled={status.loading}
+            >
               {isEditMode ? "Annuler" : "Annuler la demande"}
             </button>
           </div>

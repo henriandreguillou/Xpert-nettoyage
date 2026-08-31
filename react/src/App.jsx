@@ -103,7 +103,7 @@ function Layout() {
           />
 
           <Route
-            path="/admin/request"
+            path="/admin/requests"
             element={
               <AdminRoute>
                 <RequestsPage />

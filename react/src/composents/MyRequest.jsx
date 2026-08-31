@@ -6,8 +6,8 @@ import {
   useSearchParams
 } from "react-router-dom";
 
-// Configuration de la base de l'API avec fallback sur votre serveur Render
-const API_URL = import.meta.env?.VITE_API_URL || "https://xpert-nettoyage.onrender.com";
+import {API_URL} from "../config/api"
+
 
 export default function MesRendezvous() {
   const [numRdv, setNumRdv] = useState("");
