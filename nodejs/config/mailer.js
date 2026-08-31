@@ -1,14 +1,13 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
 
-// Chargement fallback du .env pour le dev local (ignoré en prod sur Render)
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// Configuration SMTP robuste
+// Configuration SMTP Hostinger sur port 465 (SSL)
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || "smtp.hostinger.com",
-  port: parseInt(process.env.EMAIL_PORT, 10) || 587,
-  secure: false, // TLS via STARTTLS
+  port: parseInt(process.env.EMAIL_PORT, 10) || 465,
+  secure: true, // TRUE impératif pour le port 465 (SSL direct)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -18,7 +17,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// TEST DE CONNEXION AU DÉMARRAGE : Affiche l'erreur exacte dans les logs Render
+// Test automatique de la connexion au lancement
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Erreur de connexion SMTP Hostinger :", error.message);
