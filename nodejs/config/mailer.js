@@ -12,9 +12,10 @@ console.log("  - EMAIL_USER :", process.env.EMAIL_USER ? "✅ Présent" : "❌ A
 console.log("  - EMAIL_PASS :", process.env.EMAIL_PASS ? "✅ Présent" : "❌ ABSENT");
 
 const transporter = nodemailer.createTransport({
-  host: "mail.hostinger.com", // ⚡ 'mail.hostinger.com' au lieu de 'smtp.hostinger.com'
-  port: 465,
-  secure: true, // SSL direct
+  host: process.env.EMAIL_HOST || "smtp.hostinger.com",
+  port: parseInt(process.env.EMAIL_PORT, 10) || 465,
+  secure: true, // SSL direct port 465
+  family: 4,    // ⚡ FORCE L'USAGE D'IPV4 UNIQUE (Bloque les erreurs ENETUNREACH IPv6)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -22,9 +23,9 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false
   },
-  connectionTimeout: 20000,
+  connectionTimeout: 15000,
   greetingTimeout: 10000,
-  socketTimeout: 20000,
+  socketTimeout: 15000,
 });
 
 // Test automatique de la connexion
