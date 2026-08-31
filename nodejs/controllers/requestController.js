@@ -92,30 +92,30 @@ exports.createRequest = async (req, res) => {
 
     const result = await pool.query(query, values);
 
-    // ==========================================
-    // 📧 ENVOI DE L'E-MAIL DE CONFIRMATION
-    // ==========================================
-    try {
-      const mailInfo = await sendConfirmationEmail({
-        num_rq,
-        email: email.trim().toLowerCase(),
-        nom: nom.trim(),
-        prenom: prenom?.trim() || "",
-        type_client: type_client || "particulier",
-        phone: phone.trim(),
-        adresse: adresse.trim(),
-        ville: ville.trim(),
-        code_postal: code_postal.trim()
-      });
-      console.log(`✉️ Mail envoyé pour la demande ${num_rq} à ${email} (ID: ${mailInfo.messageId})`);
-    } catch (mailError) {
-      console.error("⚠️ Erreur lors de l'envoi de l'email :", mailError.message);
-    }
-
-    return res.status(201).json({
+    // ⚡ 1. RÉPONSE IMMÉDIATE AU CLIENT (Fin du chargement côté React)
+    res.status(201).json({
       message: "Demande créée avec succès !",
       data: result.rows[0]
     });
+
+    // ⚡ 2. ENVOI DE L'E-MAIL EN ARRIÈRE-PLAN (Sans bloquer la réponse)
+    sendConfirmationEmail({
+      num_rq,
+      email: email.trim().toLowerCase(),
+      nom: nom.trim(),
+      prenom: prenom?.trim() || "",
+      type_client: type_client || "particulier",
+      phone: phone.trim(),
+      adresse: adresse.trim(),
+      ville: ville.trim(),
+      code_postal: code_postal.trim()
+    })
+      .then((mailInfo) => {
+        console.log(`✉️ Mail envoyé pour la demande ${num_rq} à ${email} (ID: ${mailInfo.messageId})`);
+      })
+      .catch((mailError) => {
+        console.error("⚠️ Erreur lors de l'envoi de l'email :", mailError.message);
+      });
 
   } catch (error) {
     console.error("🔥 ERROR:", error);
