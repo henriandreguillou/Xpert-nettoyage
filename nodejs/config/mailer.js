@@ -12,9 +12,9 @@ console.log("  - EMAIL_USER :", process.env.EMAIL_USER ? "✅ Présent" : "❌ A
 console.log("  - EMAIL_PASS :", process.env.EMAIL_PASS ? "✅ Présent" : "❌ ABSENT");
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.hostinger.com",
-  port: parseInt(process.env.EMAIL_PORT, 10) || 465,
-  secure: true, // Port 465 SSL
+  host: "mail.hostinger.com", // ⚡ 'mail.hostinger.com' au lieu de 'smtp.hostinger.com'
+  port: 465,
+  secure: true, // SSL direct
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -22,10 +22,9 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false
   },
-  // Evite de bloquer indéfiniment si le serveur SMTP est injoignable
-  connectionTimeout: 10000, 
-  greetingTimeout: 5000,
-  socketTimeout: 10000,
+  connectionTimeout: 20000,
+  greetingTimeout: 10000,
+  socketTimeout: 20000,
 });
 
 // Test automatique de la connexion
