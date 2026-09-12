@@ -1,10 +1,8 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../style-css/login.css";
 
-import {API_URL} from "../config/api"
-
+import { API_URL } from "../config/api";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -21,28 +19,36 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_URL}/api/admin/login`, {
-        email,
-        password,
+      // Construction explicite de l'URL pour éviter tout conflit de proxy
+      const endpoint = `${API_URL}/api/admin/login`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      const token = res.data?.token;
+      const data = await response.json();
 
-      if (!token) {
+      if (!response.ok) {
+        throw new Error(data.message || "Identifiants invalides");
+      }
+
+      if (!data?.token) {
         throw new Error("Token manquant dans la réponse serveur");
       }
 
-      localStorage.setItem("token", token);
+      localStorage.setItem("token", data.token);
       navigate("/admin/calendar");
     } catch (err) {
       console.error("Login error:", err);
-
-      // Handle server error response vs network error
-      const errorMessage =
-        err.response?.data?.message ||
-        (err.request ? "Impossible de contacter le serveur" : err.message);
-
-      setError(errorMessage);
+      setError(
+        err.message === "Failed to fetch"
+          ? "Impossible de contacter le serveur Render"
+          : err.message
+      );
     } finally {
       setLoading(false);
     }

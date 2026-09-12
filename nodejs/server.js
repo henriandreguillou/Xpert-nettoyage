@@ -25,12 +25,16 @@ if (!fs.existsSync(uploadDir)) {
 // ======================
 app.use(
   cors({
-    origin: "*",
+    origin: [
+      "https://xpert-nettoyage-fr-671126.hostingersite.com",
+      "http://localhost:3000",
+      "http://localhost:5173"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
   })
 );
-
 app.use(express.json());
 
 // ======================
