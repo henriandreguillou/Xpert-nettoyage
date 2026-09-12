@@ -4,21 +4,25 @@ const path = require('path');
 // Chargement fallback pour le dev local
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// Logs de contrôle au chargement pour le débug Render
+const emailHost = process.env.EMAIL_HOST || "smtp.hostinger.com";
+const emailPort = parseInt(process.env.EMAIL_PORT, 10) || 465;
+const isSecure = emailPort === 465;
+
+// Logs de contrôle au chargement
 console.log("🔍 Verification des variables SMTP :");
-console.log("  - EMAIL_HOST :", process.env.EMAIL_HOST || "smtp.hostinger.com (default)");
-console.log("  - EMAIL_PORT :", process.env.EMAIL_PORT || "465 (default)");
+console.log("  - EMAIL_HOST :", emailHost);
+console.log("  - EMAIL_PORT :", emailPort, `(secure: ${isSecure})`);
 console.log("  - EMAIL_USER :", process.env.EMAIL_USER ? "✅ Présent" : "❌ ABSENT");
 console.log("  - EMAIL_PASS :", process.env.EMAIL_PASS ? "✅ Présent" : "❌ ABSENT");
 
-// IP directe du cluster mail Hostinger (bypass DNS & Proxy Cloudflare)
+// Configuration Nodemailer adaptée à Hostinger (Port 465 / SSL)
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.hostinger.com",
-  port: parseInt(process.env.EMAIL_PORT, 10) || 587,
-  secure: false, // false pour le port 587
+  host: emailHost,
+  port: emailPort,
+  secure: isSecure, // true pour le port 465, false pour 587
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.EMAIL_USER ? process.env.EMAIL_USER.trim() : "",
+    pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim() : "",
   },
   tls: {
     rejectUnauthorized: false
@@ -48,7 +52,7 @@ const sendConfirmationEmail = async (data) => {
   const clientName = type_client === "entreprise" ? nom : `${prenom || ""} ${nom}`.trim();
 
   const mailOptions = {
-    from: `"Xpert Nettoyage" <${process.env.EMAIL_USER}>`,
+    from: `"Xpert Nettoyage" <${process.env.EMAIL_USER.trim()}>`,
     to: email,
     subject: `Confirmation de votre demande N° ${num_rq}`,
     html: `
@@ -92,7 +96,7 @@ const sendAppointmentEmail = async (data) => {
     : `Confirmation de votre rendez-vous (Demande ${num_rq})`;
 
   const mailOptions = {
-    from: `"Xpert Nettoyage" <${process.env.EMAIL_USER}>`,
+    from: `"Xpert Nettoyage" <${process.env.EMAIL_USER.trim()}>`,
     to: email,
     subject: subject,
     html: `

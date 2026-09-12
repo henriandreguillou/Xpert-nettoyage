@@ -8,8 +8,9 @@ dotenv.config();
 
 const app = express();
 
-// ⚡ CHARGEMENT DU SERVICE MAIL POUR TESTER LA CONNEXION SMTP AU DÉMARRAGE
+// ⚡ CHARGEMENT DU SERVICE MAIL
 require("./config/mailer");
+
 // ======================
 // DOSSIER UPLOADS
 // ======================
@@ -21,20 +22,21 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // ======================
-// MIDDLEWARES
+// MIDDLEWARES (CORS & PARSER)
 // ======================
 app.use(
   cors({
     origin: [
       "https://xpert-nettoyage-fr-671126.hostingersite.com",
-      "http://localhost:3000",
-      "http://localhost:5173"
+      "http://localhost:5173",
+      "http://localhost:3000"
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
   })
 );
+
 app.use(express.json());
 
 // ======================
@@ -47,6 +49,10 @@ app.use("/uploads", express.static(uploadDir));
 // ======================
 app.get("/", (req, res) => {
   res.send("API OK");
+});
+
+app.get("/api/ping", (req, res) => {
+  res.json({ status: "ok", message: "Le serveur répond correctement" });
 });
 
 // ======================
