@@ -12,47 +12,53 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    setError("");
-    setLoading(true);
+  try {
+    // Retrait du double '/api'
+    const endpoint = `${API_URL}/admin/login`;
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const rawText = await response.text();
+    let data = {};
 
     try {
-      // Construction explicite de l'URL pour éviter tout conflit de proxy
-      const endpoint = `${API_URL}/api/admin/login`;
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Identifiants invalides");
-      }
-
-      if (!data?.token) {
-        throw new Error("Token manquant dans la réponse serveur");
-      }
-
-      localStorage.setItem("token", data.token);
-      navigate("/admin/calendar");
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(
-        err.message === "Failed to fetch"
-          ? "Impossible de contacter le serveur Render"
-          : err.message
-      );
-    } finally {
-      setLoading(false);
+      data = JSON.parse(rawText);
+    } catch {
+      throw new Error(`Réponse serveur invalide (${response.status})`);
     }
-  };
+
+    if (!response.ok) {
+      throw new Error(data.message || "Identifiants invalides");
+    }
+
+    if (!data?.token) {
+      throw new Error("Token manquant dans la réponse serveur");
+    }
+
+    localStorage.setItem("token", data.token);
+    navigate("/admin/calendar");
+  } catch (err) {
+    console.error("Login error:", err);
+    setError(
+      err.message === "Failed to fetch"
+        ? "Impossible de contacter le serveur"
+        : err.message
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="login-container">

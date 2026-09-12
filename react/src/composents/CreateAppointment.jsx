@@ -9,10 +9,9 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../style-css/CreateAppointment.css";
 
+import { API_URL } from "../config/api";
+
 registerLocale("fr", fr);
-
-import {API_URL} from "../config/api"
-
 
 export default function CreateAppointment() {
   const [searchParams] = useSearchParams();
@@ -69,7 +68,7 @@ export default function CreateAppointment() {
 
   const fetchExistingAppointment = async (id, token) => {
     try {
-      const response = await axios.get(`${API_URL}/appointment/${id}`, {
+      const response = await axios.get(`${API_URL}/appointments/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = response.data;
@@ -138,7 +137,6 @@ export default function CreateAppointment() {
       return;
     }
 
-    // Message visuel explicite en cas de serveur lent / en veille
     setStatus({
       loading: true,
       message: "Enregistrement en cours... Veuillez patienter quelques instants.",
@@ -147,8 +145,8 @@ export default function CreateAppointment() {
 
     try {
       const endpoint = isEditMode
-        ? `${API_URL}/appointment/${appointmentId}`
-        : `${API_URL}/appointment`;
+        ? `${API_URL}/appointments/${appointmentId}`
+        : `${API_URL}/appointments`;
 
       const method = isEditMode ? axios.put : axios.post;
 
@@ -166,7 +164,6 @@ export default function CreateAppointment() {
         appointment: response.data.appointment,
       });
 
-      // Redirection automatique vers le calendrier après 1.5 seconde
       setTimeout(() => {
         navigate("/admin/calendar");
       }, 1500);
@@ -201,7 +198,8 @@ export default function CreateAppointment() {
     if (!window.confirm("Voulez-vous supprimer cette demande ?")) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/request/${formData.request_num_rq}`, {
+      // Correction de la variable API_BASE_URL vers API_URL
+      await axios.delete(`${API_URL}/requests/${formData.request_num_rq}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Demande supprimée avec succès");

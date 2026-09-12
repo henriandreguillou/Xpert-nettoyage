@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   useNavigate,
@@ -6,44 +6,50 @@ import {
   useSearchParams
 } from "react-router-dom";
 
-import {API_URL} from "../config/api"
-
+import { API_URL } from "../config/api";
 
 export default function MesRendezvous() {
   const [numRdv, setNumRdv] = useState("");
   const [rendezvous, setRendezvous] = useState(null);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const type = searchParams.get("type");
 
-  const fetchRdv = async (numero) => {
+  const fetchRdv = useCallback(async (numero) => {
     if (!numero) return;
 
+    setLoading(true);
+    setMessage("");
+
     try {
-      setMessage("");
-
-      // Modifié pour utiliser API_URL et la route correcte
-      const response = await axios.get(`${API_URL}/appointment/rendezvous/${numero}`);
-
+      // Endpoint réaligné sur la convention REST plurielle /appointments
+      const response = await axios.get(`${API_URL}/appointments/rendezvous/${numero}`);
       setRendezvous(response.data.data);
     } catch (error) {
       console.error(error);
       setRendezvous(null);
       setMessage(
         error.response?.data?.message ||
-        "Erreur récupération rendez-vous"
+        "Erreur lors de la récupération du rendez-vous."
       );
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
   const handleSearch = () => {
-    fetchRdv(numRdv);
+    if (!numRdv.trim()) {
+      setMessage("Veuillez saisir un numéro de rendez-vous.");
+      return;
+    }
+    fetchRdv(numRdv.trim());
   };
 
-  // Recharge automatique après modification
+  // Recharge automatique après modification ou redirection
   useEffect(() => {
     const numero = location.state?.numRdv;
 
@@ -51,37 +57,48 @@ export default function MesRendezvous() {
       setNumRdv(numero);
       fetchRdv(numero);
     }
-  }, [location.state]);
+  }, [location.state, fetchRdv]);
 
   const handleModify = () => {
-    navigate(`/modifier/${numRdv}`);
+    if (type) {
+      navigate(`/modifier/${numRdv}?type=${type}`);
+    } else {
+      navigate(`/modifier/${numRdv}`);
+    }
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
       <h1>Rechercher un rendez-vous</h1>
 
-      <input
-        type="text"
-        placeholder="Numéro de rendez-vous"
-        value={numRdv}
-        onChange={(e) => setNumRdv(e.target.value)}
-      />
+      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <input
+          type="text"
+          placeholder="Numéro de rendez-vous"
+          value={numRdv}
+          onChange={(e) => setNumRdv(e.target.value)}
+          style={{ flex: 1, padding: "8px" }}
+          disabled={loading}
+        />
 
-      <button onClick={handleSearch}>
-        Rechercher
-      </button>
+        <button onClick={handleSearch} disabled={loading}>
+          {loading ? "Recherche..." : "Rechercher"}
+        </button>
+      </div>
 
-      <br /><br />
-
-      {message && <p>{message}</p>}
+      {message && (
+        <p style={{ color: rendezvous ? "green" : "red", marginBottom: "15px" }}>
+          {message}
+        </p>
+      )}
 
       {rendezvous && (
         <div
           style={{
             border: "1px solid #ccc",
             padding: "20px",
-            borderRadius: "10px"
+            borderRadius: "10px",
+            backgroundColor: "#f9f9f9"
           }}
         >
           <h2>
@@ -96,13 +113,17 @@ export default function MesRendezvous() {
             <strong>Heure :</strong> {rendezvous.heure_rdv}
           </p>
 
-          <p>
-            <strong>Adresse :</strong> {rendezvous.adresse}
-          </p>
+          {rendezvous.adresse && (
+            <p>
+              <strong>Adresse :</strong> {rendezvous.adresse}
+            </p>
+          )}
 
-          <p>
-            <strong>Code postal :</strong> {rendezvous.code_postal}
-          </p>
+          {rendezvous.code_postal && (
+            <p>
+              <strong>Code postal :</strong> {rendezvous.code_postal}
+            </p>
+          )}
 
           <br />
 

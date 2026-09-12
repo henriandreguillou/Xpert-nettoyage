@@ -1,62 +1,75 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import "../style-css/requestsPage.css";
 
-import {API_URL} from "../config/api"
-
+import { API_URL } from "../config/api";
 
 function RequestsPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("Tous");
 
-  useEffect(() => {
-    fetchRequests();
-  }, [selectedStatus]);
-
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
-      let url = `${API_URL}/request/page`;
 
+      // 1. URL alignée sur le routeur Express : /api/requests
+      let url = `${API_URL}/requests`;
+
+      // 2. Utilisation de Query Params au lieu de sous-dossiers arbitraires
       if (selectedStatus !== "Tous") {
-        url = `${API_URL}/request/status/${selectedStatus}`;
+        url = `${API_URL}/requests?status=${encodeURIComponent(selectedStatus)}`;
       }
 
       const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
       const result = await response.json();
+      let data = Array.isArray(result) ? result : result.data || [];
 
-      let data = result.data || [];
-
-      // 1. Tri pour "en attente" : du plus ancien au plus récent (selon la date de création)
+      // Tri pour "en attente" : du plus ancien au plus récent
       if (selectedStatus === "en attente") {
         data = [...data].sort(
           (a, b) => new Date(a.created_at) - new Date(b.created_at)
         );
       }
 
-      // 2. Tri pour "programmé" : du rendez-vous le plus proche au plus loin
+      // Tri pour "programmé" : du plus proche au plus loin
       if (selectedStatus === "programmé") {
         data = [...data].sort((a, b) => {
-          // Combiner la date et l'heure pour une précision parfaite
-          const dateTimeA = new Date(`${a.date_appointment.split('T')[0]}T${a.heure_appointment || "00:00:00"}`);
-          const dateTimeB = new Date(`${b.date_appointment.split('T')[0]}T${b.heure_appointment || "00:00:00"}`);
-          
+          const dateA = a.date_appointment ? a.date_appointment.split("T")[0] : "";
+          const dateB = b.date_appointment ? b.date_appointment.split("T")[0] : "";
+
+          const dateTimeA = new Date(`${dateA}T${a.heure_appointment || "00:00:00"}`);
+          const dateTimeB = new Date(`${dateB}T${b.heure_appointment || "00:00:00"}`);
+
           return dateTimeA - dateTimeB;
         });
       }
 
       setRequests(data);
     } catch (error) {
-      console.error(error);
+      console.error("Erreur lors du chargement des demandes :", error);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedStatus]);
 
-  // Utilitaire pour formater la date proprement au format français
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
+    const cleanDate = dateStr.split("T")[0];
+    const [year, month, day] = cleanDate.split("-");
+    if (year && month && day) {
+      return `${day}/${month}/${year}`;
+    }
     return new Date(dateStr).toLocaleDateString("fr-FR");
   };
 
@@ -64,10 +77,9 @@ function RequestsPage() {
     <div className="requests-page">
       <h1 className="requests-title">Liste des demandes</h1>
 
-      {/* Barre de filtres par Statut */}
       <div className="status-filter-container">
         {["Tous", "en attente", "programmé"].map((status) => (
-          <button 
+          <button
             key={status}
             onClick={() => setSelectedStatus(status)}
             className={`status-filter-btn ${selectedStatus === status ? "active" : ""}`}
@@ -93,10 +105,10 @@ function RequestsPage() {
                 <th>Ville</th>
                 <th>CP</th>
                 <th>Complément</th>
-                <th>Statut</th> 
-                <th>Rendez-vous</th> {/* Colonne Date & Heure */}
+                <th>Statut</th>
+                <th>Rendez-vous</th>
                 <th>Pièce jointe</th>
-                <th></th>
+                <th>Actions</th>
               </tr>
             </thead>
 
@@ -109,7 +121,7 @@ function RequestsPage() {
                 </tr>
               ) : (
                 requests.map((request) => (
-                  <tr key={request.id}>
+                  <tr key={request.id || request.num_rq}>
                     <td>{request.num_rq}</td>
                     <td>{request.nom}</td>
                     <td>{request.prenom}</td>
@@ -119,19 +131,24 @@ function RequestsPage() {
                     <td>{request.ville}</td>
                     <td>{request.code_postal}</td>
                     <td>{request.complement_adresse || "-"}</td>
-                    
+
                     <td>
-                      <span className={`status-badge ${request.status === "programmé" ? "status-programmed" : "status-pending"}`}>
+                      <span
+                        className={`status-badge ${
+                          request.status === "programmé" ? "status-programmed" : "status-pending"
+                        }`}
+                      >
                         {request.status || "en attente"}
                       </span>
                     </td>
 
-                    {/* CELLULE MIS À JOUR AVEC TES COLONNES POSTGRES */}
                     <td className="appointment-cell">
                       {request.status === "programmé" && request.date_appointment ? (
                         <div className="appointment-datetime">
                           <span className="appt-date">{formatDate(request.date_appointment)}</span>
-                          <span className="appt-time">à {request.heure_appointment?.substring(0, 5) || ""}</span>
+                          <span className="appt-time">
+                            à {request.heure_appointment?.substring(0, 5) || ""}
+                          </span>
                         </div>
                       ) : (
                         <span className="no-appointment">-</span>

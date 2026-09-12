@@ -3,75 +3,69 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const fs = require("fs");
 const path = require("path");
+const helmet = require("helmet");
 
 dotenv.config();
 
 const app = express();
 
-// ⚡ CHARGEMENT DU SERVICE MAIL
+// Load Mail Service
 require("./config/mailer");
 
-// ======================
-// DOSSIER UPLOADS
-// ======================
+// Ensure Uploads Folder Exists
 const uploadDir = path.join(__dirname, "uploads");
-
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-  console.log("📁 Dossier uploads créé");
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log("📁 Uploads directory created");
 }
 
-// ======================
-// MIDDLEWARES (CORS & PARSER)
-// ======================
+// Security & Parsing Middlewares
+app.use(helmet());
 app.use(
   cors({
     origin: [
       "https://xpert-nettoyage-fr-671126.hostingersite.com",
       "http://localhost:5173",
-      "http://localhost:3000"
+      "http://localhost:3000",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
+    credentials: true,
   })
 );
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ======================
-// FICHIERS STATIQUES
-// ======================
+// Static File Access
 app.use("/uploads", express.static(uploadDir));
 
-// ======================
-// TEST ROUTE
-// ======================
-app.get("/", (req, res) => {
-  res.send("API OK");
-});
-
+// Health Checks
+app.get("/", (req, res) => res.send("API OK"));
 app.get("/api/ping", (req, res) => {
-  res.json({ status: "ok", message: "Le serveur répond correctement" });
+  res.json({ status: "ok", message: "Server is running smoothly" });
 });
 
-// ======================
-// ROUTES
-// ======================
-const appointmentRoutes = require("./routes/appointmentRoutes");
-app.use("/appointment", appointmentRoutes);
+// Standardized Routes API
+app.use("/api/appointments", require("./routes/appointmentRoutes"));
+app.use("/api/requests", require("./routes/requestRoutes"));
+app.use("/api/admin", require("./routes/auth.routes"));
 
-const requestRoutes = require("./routes/requestRoutes");
-app.use("/request", requestRoutes);
+// 404 Handler for Undefined Routes
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
 
-const authRoutes = require("./routes/auth.routes");
-app.use("/api/admin", authRoutes);
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("Unhandled Error:", err.stack);
+  res.status(err.status || 500).json({
+    error: process.env.NODE_ENV === "production" ? "Internal Server Error" : err.message,
+  });
+});
 
-// ======================
-// DEMARRAGE SERVEUR
-// ======================
+// Server Listener
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Serveur lancé sur le port ${PORT}`);
+  console.log(`🚀 Server listening on port ${PORT}`);
 });

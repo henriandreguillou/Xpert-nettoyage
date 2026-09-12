@@ -128,29 +128,38 @@ exports.createRequest = async (req, res) => {
 };
 
 exports.getAllRequests = async (req, res) => {
-    try {
-        // MODIFIE LA REQUÊTE ICI AVEC LE LEFT JOIN
-        const query = `
-          SELECT 
-            r.*, 
-            a.date_appointment, 
-            a.heure_appointment
-          FROM request r
-          LEFT JOIN appointment a ON r.num_rq = a.request_num_rq
-          ORDER BY r.created_at DESC;
-        `;
+  try {
+    const { status } = req.query;
 
-        const result = await pool.query(query);
+    let query = `
+      SELECT 
+        r.*, 
+        a.date_appointment, 
+        a.heure_appointment
+      FROM request r
+      LEFT JOIN appointment a ON r.num_rq = a.request_num_rq
+    `;
 
-        return res.status(200).json({
-          data: result.rows
-        });
-      } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Erreur serveur" });
-      }
+    const values = [];
+
+    // Si un filtre de statut est présent dans la requête
+    if (status) {
+      query += ` WHERE r.status = $1`;
+      values.push(status);
+    }
+
+    query += ` ORDER BY r.created_at DESC;`;
+
+    const result = await pool.query(query, values);
+
+    return res.status(200).json({
+      data: result.rows
+    });
+  } catch (error) {
+    console.error("Erreur getAllRequests:", error);
+    return res.status(500).json({ message: "Erreur serveur" });
+  }
 };
-
 exports.getRequestByNum = async (req, res) => {
   try {
     const { num_rq } = req.params;

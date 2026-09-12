@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.jpeg";
 import "../style-css/headerAdmin.css";
 
-import {API_URL} from "../config/api"
+import { API_URL } from "../config/api";
 
 export default function HeaderAdmin() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,7 +34,8 @@ export default function HeaderAdmin() {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const res = await fetch(`${API_URL}/api/admin/me`, {
+        // ✅ Retrait du double "/api" -> ${API_URL}/admin/me
+        const res = await fetch(`${API_URL}/admin/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

@@ -1,3 +1,4 @@
-const RAW_URL = import.meta.env?.VITE_API_URL || "https://api.xpert-nettoyage-fr-671126.hostingersite.com";
+const RAW_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
 
-export const API_URL = RAW_URL.replace(/\/$/, "");
+// Base propre de l'API avec /api inclus
+export const API_URL = `${RAW_URL.replace(/\/$/, "")}/api`;

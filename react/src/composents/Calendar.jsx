@@ -8,8 +8,7 @@ import frLocale from "@fullcalendar/core/locales/fr";
 import { useNavigate } from "react-router-dom";
 import "../style-css/calendar.css";
 
-import {API_URL} from "../config/api"
-
+import { API_URL } from "../config/api";
 
 export default function Calendar() {
   const [events, setEvents] = useState([]);
@@ -31,15 +30,12 @@ export default function Calendar() {
     }
 
     try {
-      // Utilisation de API_URL au lieu de localhost
-      const res = await axios.get(
-        `${API_URL}/appointment/calendar`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // Ajustez le chemin selon votre convention backend (/appointments/calendar ou /appointment/calendar)
+      const res = await axios.get(`${API_URL}/appointments/calendar`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const formatted = res.data.map((rdv) => {
         let date;
@@ -63,7 +59,7 @@ export default function Calendar() {
           title:
             rdv.type_client === "entreprise"
               ? rdv.societe || "Entreprise"
-              : `${rdv.nom || ""} ${rdv.prenom || ""}`,
+              : `${rdv.nom || ""} ${rdv.prenom || ""}`.trim(),
           start: `${date}T${heure}`,
           extendedProps: {
             nom: rdv.nom || "",
@@ -96,13 +92,11 @@ export default function Calendar() {
     }
   };
 
-  // Redirection vers le formulaire d'édition
   const handleEdit = (id) => {
     setSelectedRdv(null);
     navigate(`/admin/appointment/edit/${id}`);
   };
 
-  // Supprimer / Annuler le rendez-vous
   const deleteAppointment = async (id) => {
     if (!window.confirm("Êtes-vous sûr de vouloir annuler ce rendez-vous ?")) {
       return;
@@ -111,8 +105,7 @@ export default function Calendar() {
     const token = localStorage.getItem("token");
 
     try {
-      // Utilisation de API_URL au lieu de localhost
-      await axios.delete(`${API_URL}/appointment/${id}`, {
+      await axios.delete(`${API_URL}/appointments/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
