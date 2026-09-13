@@ -51,7 +51,7 @@ console.log("🟢 DB USER:", process.env.DB_USER);
 console.log("🟢 DB HOST:", process.env.DB_HOST);
 console.log("🟢 DB NAME:", process.env.DB_NAME);
 
-// 3. Détection de l'environnement (SSL requis pour le Cloud / Neon / Supabase)
+// 3. Détection de l'environnement
 const isLocalhost =
   process.env.DB_HOST === "localhost" || process.env.DB_HOST === "127.0.0.1";
 
@@ -65,19 +65,21 @@ const pool = new Pool({
   ssl: isLocalhost ? false : { rejectUnauthorized: false },
 });
 
-// 5. Écoute des erreurs globales du pool (évite le crash de l'application)
+// 5. Écoute des erreurs globales du pool
 pool.on("error", (err) => {
-  console.error("❌ Erreur inattendue sur un client PostgreSQL inactif :", err.message);
+  console.error("❌ Erreur inattendue sur un client PostgreSQL inactif :", err);
 });
 
 // 6. Test de connexion initial lors du lancement de l'application
-pool.connect()
-  .then((client) => {
-    console.log("✅ Connexion PostgreSQL réussie");
+(async () => {
+  try {
+    const client = await pool.connect();
+    console.log("✅ Connexion PostgreSQL réussie !");
     client.release();
-  })
-  .catch((err) => {
-    console.error("❌ Erreur de connexion PostgreSQL initiale :", err.message);
-  });
+  } catch (err) {
+    console.error("❌ Erreur de connexion PostgreSQL initiale :");
+    console.error(err); // Affiche l'objet d'erreur complet (stack trace, code, detail)
+  }
+})();
 
 module.exports = pool;
