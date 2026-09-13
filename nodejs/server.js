@@ -24,6 +24,8 @@ app.use(helmet());
 app.use(
   cors({
     origin: [
+      "https://xpert-nettoyage.fr",
+      "https://www.xpert-nettoyage.fr",
       "https://xpert-nettoyage-fr-671126.hostingersite.com",
       "http://localhost:5173",
       "http://localhost:3000",
